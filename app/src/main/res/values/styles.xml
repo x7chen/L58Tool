@@ -1,0 +1,11 @@
+<resources>
+
+    <!-- Base application theme. -->
+    <style name="Theme.Base" parent="android:Theme.Material.Light">
+        <item name="android:actionBarStyle" >@style/myActionBarStyle</item>
+    </style>
+    <style name="myActionBarStyle" parent="android:Widget.ActionBar" >
+        <item name="android:background">#a9d032</item>
+    </style>
+
+</resources>
