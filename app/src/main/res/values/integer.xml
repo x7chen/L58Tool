@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <integer name="nordic_ble_connect_command">10</integer>
-    <integer name="nordic_ble_disconnect_command">11</integer>
-    <integer name="nordic_ble_nus_read_characteristic">20</integer>
-    <integer name="nordic_ble_nus_write_characteristic">21</integer>
-    <integer name="nordic_ble_nus_tx_set_notification">22</integer>
-
-</resources>

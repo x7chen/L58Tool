@@ -23,6 +23,8 @@
         <service
             android:name=".BluetoothLeService"
             android:enabled="true" />
+        <service android:name=".PacketParser"
+            android:enabled="true"/>
     </application>
 
 </manifest>

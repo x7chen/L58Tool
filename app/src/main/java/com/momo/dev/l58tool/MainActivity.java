@@ -2,8 +2,10 @@ package com.momo.dev.l58tool;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothManager;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
@@ -13,6 +15,7 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
@@ -24,11 +27,17 @@ public class MainActivity extends AppCompatActivity implements ActionBar.TabList
     SectionsPagerAdapter mSectionsPagerAdapter;
     ViewPager mViewPager;
     static public BluetoothAdapter mBluetoothAdapter;
+    private Fragment scanfragment;
+    private Fragment testfragment;
+    private Fragment logfragment;
+
+    Intent GattCommand = new Intent(BluetoothLeService.ACTION_GATT_HANDLE);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
 
         // Use this check to determine whether BLE is supported on the device.  Then you can
         // selectively disable BLE-related features.
@@ -37,8 +46,18 @@ public class MainActivity extends AppCompatActivity implements ActionBar.TabList
             finish();
         }
 
+
+        scanfragment = ScanFragment.newInstance("1","2");
+        testfragment = TestFragment.newInstance("1","2");
+        logfragment = LogFragment.newInstance("1","2");
+
         final Intent intent = new Intent(this,BluetoothLeService.class);
         startService(intent);
+
+        Intent intent_packet = new Intent(this,PacketParser.class);
+        startService(intent_packet);
+
+        registerReceiver(MyReceiver, MyIntentFilter());
         // Initializes a Bluetooth adapter.  For API level 18 and above, get a reference to
         // BluetoothAdapter through BluetoothManager.
         final BluetoothManager bluetoothManager =
@@ -155,13 +174,13 @@ public class MainActivity extends AppCompatActivity implements ActionBar.TabList
             Bundle args = new Bundle();
             switch (position){
                 case 0:
-                    fragment = ScanFragment.newInstance("1","2");
+                    fragment = scanfragment;
                     break;
                 case 1:
-                    fragment = TestFragment.newInstance("1","2");
+                    fragment = testfragment;
                     break;
                 case 2:
-                    fragment = LogFragment.newInstance("1","2");
+                    fragment = logfragment;
                     break;
             }
 
@@ -205,5 +224,38 @@ public class MainActivity extends AppCompatActivity implements ActionBar.TabList
         // END_INCLUDE (fragment_pager_adapter_getpagetitle)
     }
 
+    private BroadcastReceiver MyReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            final String action = intent.getAction();
+            String data;
+            if(BluetoothLeService.ACTION_DATA_AVAILABLE.equals(action)){
+                data=intent.getStringExtra(BluetoothLeService.HandleData);
+                Log.i(BluetoothLeService.TAG, data);
+            }
+            else if(BluetoothLeService.ACTION_GATT_SERVICES_DISCOVERED.equals(action)){
+                BluetoothLeService.HandleCommand cmd = BluetoothLeService.HandleCommand.NUS_TX_SET_NOTIFICATION;
+                GattCommand.putExtra(BluetoothLeService.HandleCMD, cmd.getIndex());
+                GattCommand.putExtra(BluetoothLeService.HandleData, true);
+                sendBroadcast(GattCommand);
+            }
+            else if(BluetoothLeService.ACTION_GATT_CONNECTED.equals(action)){
+                ScanFragment.BLE_CONNECT_STATUS = true;
+                Toast.makeText(MainActivity.this, R.string.device_connected, Toast.LENGTH_SHORT).show();
+            }
+            else if (BluetoothLeService.ACTION_GATT_DISCONNECTED.equals(action)){
+                ScanFragment.BLE_CONNECT_STATUS = false;
+                Toast.makeText(MainActivity.this,R.string.device_disconnected,Toast.LENGTH_SHORT).show();
+            }
+        }
+    };
+    private static IntentFilter MyIntentFilter() {
+        final IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(BluetoothLeService.ACTION_GATT_CONNECTED);
+        intentFilter.addAction(BluetoothLeService.ACTION_GATT_DISCONNECTED);
+        intentFilter.addAction(BluetoothLeService.ACTION_GATT_SERVICES_DISCOVERED);
+        intentFilter.addAction(BluetoothLeService.ACTION_DATA_AVAILABLE);
 
+        return intentFilter;
+    }
 }

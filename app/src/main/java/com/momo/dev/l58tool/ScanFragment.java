@@ -5,28 +5,35 @@ import android.app.ListFragment;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothManager;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.TextView;
+import android.widget.Toast;
 
 
 public class ScanFragment extends Fragment {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
+    public static boolean BLE_CONNECT_STATUS = false;
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
-
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
+
+    Intent GattCommand = new Intent(BluetoothLeService.ACTION_GATT_HANDLE);
 
     private LeDeviceListAdapter mLeDeviceListAdapter;
     private BluetoothAdapter mBluetoothAdapter;
@@ -64,10 +71,7 @@ public class ScanFragment extends Fragment {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
-        mBluetoothAdapter = MainActivity.mBluetoothAdapter;
-        mHandler = new Handler();
-        // Initializes list view adapter.
-        scanLeDevice(true);
+
     }
 
     @Override
@@ -75,25 +79,52 @@ public class ScanFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View rootview = inflater.inflate(R.layout.fragment_scan,container,false);
-        ListView listView = (ListView)rootview.findViewById(R.id.listView);
+        ListView listView = (ListView)rootview.findViewById(R.id.listView_Device);
         mLeDeviceListAdapter = new LeDeviceListAdapter(getActivity());
         listView.setAdapter(mLeDeviceListAdapter);
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 final BluetoothDevice device = mLeDeviceListAdapter.getDevice(position);
+                BluetoothLeService.HandleCommand cmd;
                 if (device == null) return;
-//                final Intent intent = new Intent(this, SerialPortAssistant.class);
-//                intent.putExtra(SerialPortAssistant.EXTRAS_DEVICE_NAME, device.getName());
-//                intent.putExtra(SerialPortAssistant.EXTRAS_DEVICE_ADDRESS, device.getAddress());
                 if (mScanning) {
                     mBluetoothAdapter.stopLeScan(mLeScanCallback);
                     mScanning = false;
                 }
-//                startActivity(intent);
+                if (ScanFragment.BLE_CONNECT_STATUS == false) {
+                    cmd= BluetoothLeService.HandleCommand.NORDIC_BLE_CONNECT;
+                    GattCommand.putExtra(BluetoothLeService.HandleCMD, cmd.getHandleCommandIndex(cmd.getCommand()));
+                    GattCommand.putExtra(BluetoothLeService.HandleDeviceAddress, device.getAddress());
+                    getActivity().sendBroadcast(GattCommand);
+                } else {
+                    cmd= BluetoothLeService.HandleCommand.NORDIC_BLE_DISCONNECT;
+                    GattCommand.putExtra(BluetoothLeService.HandleCMD, cmd.getHandleCommandIndex(cmd.getCommand()));
+                    getActivity().sendBroadcast(GattCommand);
+                }
             }
         });
         return rootview;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if(ScanFragment.BLE_CONNECT_STATUS == false) {
+            mBluetoothAdapter = MainActivity.mBluetoothAdapter;
+            mHandler = new Handler();
+            // Initializes list view adapter.
+            scanLeDevice(true);
+        }
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        if(ScanFragment.BLE_CONNECT_STATUS == false) {
+            scanLeDevice(false);
+            mLeDeviceListAdapter.clear();
+        }
     }
 
     @Override
@@ -142,5 +173,7 @@ public class ScanFragment extends Fragment {
                     });
                 }
             };
+
+
 
 }

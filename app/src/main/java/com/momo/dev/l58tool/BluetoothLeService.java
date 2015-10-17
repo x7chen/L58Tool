@@ -44,7 +44,74 @@ import java.util.UUID;
  * given Bluetooth LE device.
  */
 public class BluetoothLeService extends Service {
-    private final static String TAG = BluetoothLeService.class.getSimpleName();
+    public final static String TAG = BluetoothLeService.class.getSimpleName();
+
+    public static String HandleCMD = "HandleCommand";
+    public static String HandleData = "HandleCommand.Data";
+    public static String HandleDeviceAddress = "HandleCommand.DeviceAddress";
+
+    public enum HandleCommand {
+        COMMAND_DUMMY("COMMAND_DUMMY",0),
+        NORDIC_BLE_CONNECT("NORDIC_BLE_CONNECT",1),
+        NORDIC_BLE_DISCONNECT("NORDIC_BLE_DISCONNECT",2),
+        NUS_READ_CHARACTERISTIC("NUS_READ_CHARACTERISTIC",3),
+        NUS_WRITE_CHARACTERISTIC("NUS_WRITE_CHARACTERISTIC",4),
+        NUS_TX_SET_NOTIFICATION("NUS_TX_SET_NOTIFICATION",5);
+
+        // 成员变量
+        private String command;
+        private int index;
+
+        // 构造方法
+        private HandleCommand(String command, int index) {
+            this.command = command;
+            this.index = index;
+        }
+
+        // 普通方法
+        public static HandleCommand getHandleCommand(int index) {
+            for (HandleCommand hc : HandleCommand.values()) {
+                if (hc.getIndex() == index) {
+                    return hc;
+                }
+            }
+            return null;
+        }
+        public static HandleCommand getHandleCommand(String command) {
+            for (HandleCommand hc : HandleCommand.values()) {
+                if (hc.getCommand() == command) {
+                    return hc;
+                }
+            }
+            return null;
+        }
+
+        public static int getHandleCommandIndex(String command){
+            for (HandleCommand hc : HandleCommand.values()){
+                if (hc.getCommand() == command){
+                    return hc.index;
+                }
+            }
+            return 0;
+        }
+
+        // get set 方法
+        public String getCommand() {
+            return command;
+        }
+
+        public void setCommand(String command) {
+            this.command = command;
+        }
+
+        public int getIndex() {
+            return index;
+        }
+
+        public void setIndex(int index) {
+            this.index = index;
+        }
+    }
 
     private BluetoothManager mBluetoothManager;
     private BluetoothAdapter mBluetoothAdapter;
@@ -66,8 +133,8 @@ public class BluetoothLeService extends Service {
             "com.example.bluetooth.le.ACTION_DATA_AVAILABLE";
     public final static String ACTION_GATT_HANDLE =
             "com.example.bluetooth.le.ACTION_GATT_HANDLE";
-    public final static String EXTRA_DATA =
-            "com.example.bluetooth.le.EXTRA_DATA";
+    public final static String ACTION_GATT_IDLE =
+            "com.example.bluetooth.le.ACTION_GATT_IDLE";
     public static final UUID NUS_SERVICE_UUID = UUID.fromString("6e400001-b5a3-f393-e0a9-e50e24dcca9e");
     public static final UUID RX_CHAR_UUID = UUID.fromString("6e400002-b5a3-f393-e0a9-e50e24dcca9e");
     public static final UUID TX_CHAR_UUID = UUID.fromString("6e400003-b5a3-f393-e0a9-e50e24dcca9e");
@@ -123,6 +190,12 @@ public class BluetoothLeService extends Service {
             broadcastUpdate(ACTION_DATA_AVAILABLE, characteristic);
             Log.i(TAG,"onCharacteristicChanged");
         }
+
+        @Override
+        public void onReliableWriteCompleted(BluetoothGatt gatt, int status) {
+            super.onReliableWriteCompleted(gatt, status);
+            broadcastUpdate(ACTION_GATT_IDLE);
+        }
     };
 
     @Override
@@ -151,7 +224,7 @@ public class BluetoothLeService extends Service {
             final StringBuilder stringBuilder = new StringBuilder(data.length);
             for(byte byteChar : data)
                 stringBuilder.append(String.format("%02X ", byteChar));
-            intent.putExtra(EXTRA_DATA, "[ASC]:"+new String(data) + "\n" +"[HEX]:"+stringBuilder.toString()+"\n");
+            intent.putExtra(HandleData, "[ASC]:"+new String(data) + "\n" +"[HEX]:"+stringBuilder.toString()+"\n");
 
         }
         sendBroadcast(intent);
@@ -316,6 +389,16 @@ public class BluetoothLeService extends Service {
         characteristic.setValue(data);
         mBluetoothGatt.writeCharacteristic(characteristic);
     }
+    public void writeCharacteristic(BluetoothGattCharacteristic characteristic,byte[] data) {
+        if (mBluetoothAdapter == null || mBluetoothGatt == null) {
+            Log.w(TAG, "BluetoothAdapter not initialized");
+            return;
+        }
+        characteristic.setValue(data);
+        mBluetoothGatt.executeReliableWrite();
+        mBluetoothGatt.writeCharacteristic(characteristic);
+
+    }
     /**
      * Enables or disables notification on a give characteristic.
      *
@@ -354,31 +437,41 @@ public class BluetoothLeService extends Service {
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
-            int cmd = intent.getIntExtra("cmd", 0);
+            HandleCommand cmd = HandleCommand.getHandleCommand(intent.getIntExtra(HandleCMD, 0));
             BluetoothGattCharacteristic characteristic;
             if(BluetoothLeService.ACTION_GATT_HANDLE.equals(action)){
                 switch (cmd){
-                    case R.integer.nordic_ble_connect_command:
+                    case NORDIC_BLE_CONNECT:
                         initialize();
-                        String btaddr = intent.getStringExtra("addr");
+                        String btaddr = intent.getStringExtra(HandleDeviceAddress);
                         connect(btaddr);
                         Log.i(TAG,"Broadcast connect.");
                         break;
-                    case R.integer.nordic_ble_disconnect_command:
+                    case NORDIC_BLE_DISCONNECT:
                         disconnect();
                         Log.i(TAG, "Broadcast disconnect.");
                         break;
-                    case R.integer.nordic_ble_nus_write_characteristic:
-                        String data = intent.getStringExtra("data");
-
+                    case NUS_WRITE_CHARACTERISTIC:
+                        byte[] data = intent.getByteArrayExtra(HandleData);
                         Log.i(TAG, "nordic_ble_nus_write_characteristic");
                         characteristic = mBluetoothGatt.getService(NUS_SERVICE_UUID).getCharacteristic(RX_CHAR_UUID);
-                        Log.i(TAG,data);
                         writeCharacteristic(characteristic,data);
+                        String strBuilder = new String();
+                        if(data == null){
+                            Log.i(TAG, "data is null");
+                            break;
+                        }
+                        for (byte bb:data) {
+                            strBuilder = strBuilder+Integer.toHexString(bb&0xff).toUpperCase();
+                            strBuilder += " ";
+                        }
+                        Log.d(TAG, strBuilder);
                         break;
-                    case R.integer.nordic_ble_nus_tx_set_notification:
-                        Boolean notification = intent.getBooleanExtra("notification", false);
-                        Log.i(TAG, "nordic_ble_nus_tx_set_notification");
+                    case NUS_TX_SET_NOTIFICATION:
+                        Boolean notification = intent.getBooleanExtra(HandleData, false);
+                        if(notification.equals(true)) {
+                            Log.i(TAG, "nordic_ble_nus_tx_set_notification");
+                        }
                         characteristic = mBluetoothGatt.getService(NUS_SERVICE_UUID).getCharacteristic(TX_CHAR_UUID);
                         setCharacteristicNotification(characteristic, notification);
                         break;
@@ -391,10 +484,10 @@ public class BluetoothLeService extends Service {
     };
     private static IntentFilter MyIntentFilter() {
         final IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(BluetoothLeService.ACTION_GATT_CONNECTED);
-        intentFilter.addAction(BluetoothLeService.ACTION_GATT_DISCONNECTED);
-        intentFilter.addAction(BluetoothLeService.ACTION_GATT_SERVICES_DISCOVERED);
-        intentFilter.addAction(BluetoothLeService.ACTION_DATA_AVAILABLE);
+//        intentFilter.addAction(BluetoothLeService.ACTION_GATT_CONNECTED);
+//        intentFilter.addAction(BluetoothLeService.ACTION_GATT_DISCONNECTED);
+//        intentFilter.addAction(BluetoothLeService.ACTION_GATT_SERVICES_DISCOVERED);
+//        intentFilter.addAction(BluetoothLeService.ACTION_DATA_AVAILABLE);
         intentFilter.addAction(BluetoothLeService.ACTION_GATT_HANDLE);
         return intentFilter;
     }
