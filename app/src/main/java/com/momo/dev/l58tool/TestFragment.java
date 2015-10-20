@@ -81,6 +81,8 @@ private TestItemAdapter mtestItemAdapter;
                         getActivity().sendBroadcast(PacketHandle);
                         break;
                     case 1:
+                        PacketHandle.putExtra(PacketParser.HANDLE,2);
+                        getActivity().sendBroadcast(PacketHandle);
                         break;
                     default:
                         break;

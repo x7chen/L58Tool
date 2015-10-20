@@ -185,6 +185,16 @@ public class BluetoothLeService extends Service {
         }
 
         @Override
+        public void onCharacteristicWrite(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
+            Log.i(TAG,"onCharacteristicWrite status:"+String.valueOf(status));
+            super.onCharacteristicWrite(gatt, characteristic, status);
+
+                //gatt.executeReliableWrite();
+            Log.i(TAG, "executeReliableWrite");
+
+        }
+
+        @Override
         public void onCharacteristicChanged(BluetoothGatt gatt,
                                             BluetoothGattCharacteristic characteristic) {
             broadcastUpdate(ACTION_DATA_AVAILABLE, characteristic);
@@ -221,10 +231,11 @@ public class BluetoothLeService extends Service {
         // For all other profiles, writes the data formatted in HEX.
         final byte[] data = characteristic.getValue();
         if (data != null && data.length > 0) {
-            final StringBuilder stringBuilder = new StringBuilder(data.length);
-            for(byte byteChar : data)
-                stringBuilder.append(String.format("%02X ", byteChar));
-            intent.putExtra(HandleData, "[ASC]:"+new String(data) + "\n" +"[HEX]:"+stringBuilder.toString()+"\n");
+//            final StringBuilder stringBuilder = new StringBuilder(data.length);
+//            for(byte byteChar : data)
+//                stringBuilder.append(String.format("%02X ", byteChar));
+//            intent.putExtra(HandleData, "[ASC]:"+new String(data) + "\n" +"[HEX]:"+stringBuilder.toString()+"\n");
+            intent.putExtra(HandleData,data);
 
         }
         sendBroadcast(intent);
@@ -394,8 +405,8 @@ public class BluetoothLeService extends Service {
             Log.w(TAG, "BluetoothAdapter not initialized");
             return;
         }
+        //Log.i(TAG,"beginReliableWrite"+String.valueOf(mBluetoothGatt.beginReliableWrite()));
         characteristic.setValue(data);
-        mBluetoothGatt.executeReliableWrite();
         mBluetoothGatt.writeCharacteristic(characteristic);
 
     }
@@ -413,13 +424,18 @@ public class BluetoothLeService extends Service {
         }
         mBluetoothGatt.setCharacteristicNotification(characteristic, enabled);
 
-        // This is specific to Heart Rate Measurement.
-        if(TX_CHAR_UUID.equals(characteristic.getUuid())){
-            BluetoothGattDescriptor descriptor = characteristic.getDescriptor(
-                    UUID.fromString(CLIENT_CHARACTERISTIC_CONFIG));
-            descriptor.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
-            mBluetoothGatt.writeDescriptor(descriptor);
+        List<BluetoothGattDescriptor> descriptors=characteristic.getDescriptors();
+        for(BluetoothGattDescriptor dp:descriptors){
+            dp.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
+            mBluetoothGatt.writeDescriptor(dp);
         }
+        // This is specific to Heart Rate Measurement.
+//        if(TX_CHAR_UUID.equals(characteristic.getUuid())){
+//            BluetoothGattDescriptor descriptor = characteristic.getDescriptor(
+//                    UUID.fromString(CLIENT_CHARACTERISTIC_CONFIG));
+//            descriptor.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
+//            mBluetoothGatt.writeDescriptor(descriptor);
+//        }
     }
 
     /**
@@ -474,6 +490,8 @@ public class BluetoothLeService extends Service {
                         }
                         characteristic = mBluetoothGatt.getService(NUS_SERVICE_UUID).getCharacteristic(TX_CHAR_UUID);
                         setCharacteristicNotification(characteristic, notification);
+//                        characteristic = mBluetoothGatt.getService(NUS_SERVICE_UUID).getCharacteristic(RX_CHAR_UUID);
+//                        setCharacteristicNotification(characteristic, notification);
                         break;
                     default:
                         break;

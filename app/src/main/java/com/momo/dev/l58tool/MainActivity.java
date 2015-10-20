@@ -228,10 +228,8 @@ public class MainActivity extends AppCompatActivity implements ActionBar.TabList
         @Override
         public void onReceive(Context context, Intent intent) {
             final String action = intent.getAction();
-            String data;
             if(BluetoothLeService.ACTION_DATA_AVAILABLE.equals(action)){
-                data=intent.getStringExtra(BluetoothLeService.HandleData);
-                Log.i(BluetoothLeService.TAG, data);
+
             }
             else if(BluetoothLeService.ACTION_GATT_SERVICES_DISCOVERED.equals(action)){
                 BluetoothLeService.HandleCommand cmd = BluetoothLeService.HandleCommand.NUS_TX_SET_NOTIFICATION;
