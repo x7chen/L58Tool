@@ -10,6 +10,7 @@ import android.os.Build;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.util.Log;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -21,24 +22,26 @@ import java.util.List;
  */
 public class PacketParserService extends Service {
 
-    int mVERSION = 100;
+    private int mVERSION = 100;
 
     public final static String ACTION_PACKET_HANDLE =
             "com.momo.dev.l58tool.packet.parser.ACTION_PACKET_HANDLE";
 
     public final static String HANDLE = "PacketHandle";
-    int GattStatus = 0;
-    int resent_cnt = 0;
-    Intent GattCommand = new Intent(BluetoothLeService.ACTION_GATT_HANDLE);
+    boolean BLE_CONNECT_STATUS;
+    private int GattStatus = 0;
+    private int resent_cnt = 0;
+    private Intent GattCommand = new Intent(BluetoothLeService.ACTION_GATT_HANDLE);
 
-    Packet send_packet = new Packet();
-    Packet receive_packet = new Packet();
-    List<Alarm> mAlarms = new ArrayList<Alarm>();
-    List<SportData> mSportData = new ArrayList<SportData>();
-    List<SleepData> mSleepData = new ArrayList<SleepData>();
-    List<SleepSetting> mSleepSetting = new ArrayList<SleepSetting>();
+    private Packet send_packet = new Packet();
+    private Packet receive_packet = new Packet();
+    private List<Alarm> mAlarms = new ArrayList<Alarm>();
+    private List<SportData> mSportData = new ArrayList<SportData>();
+    private List<SleepData> mSleepData = new ArrayList<SleepData>();
+    private List<SleepSetting> mSleepSetting = new ArrayList<SleepSetting>();
+    DailyData mDailyData = new DailyData();
 
-    LocalBinder mBinder = new LocalBinder();
+    private LocalBinder mBinder = new LocalBinder();
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
@@ -54,8 +57,30 @@ public class PacketParserService extends Service {
     public void onCreate() {
         super.onCreate();
         registerReceiver(MyReceiver, MyIntentFilter());
+        final Intent intent = new Intent(this,BluetoothLeService.class);
+        startService(intent);
     }
-    public void sendACK(Packet rPacket,boolean error){
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        final Intent intent = new Intent(this,BluetoothLeService.class);
+        stopService(intent);
+    }
+
+    public void connect(String address){
+
+        BluetoothLeService.HandleCommand cmd = BluetoothLeService.HandleCommand.NORDIC_BLE_CONNECT;
+        GattCommand.putExtra(BluetoothLeService.HandleCMD, cmd.getHandleCommandIndex(cmd.getCommand()));
+        GattCommand.putExtra(BluetoothLeService.HandleDeviceAddress, address);
+        sendBroadcast(GattCommand);
+    }
+    public void disconnect(){
+        BluetoothLeService.HandleCommand cmd = BluetoothLeService.HandleCommand.NORDIC_BLE_DISCONNECT;
+        GattCommand.putExtra(BluetoothLeService.HandleCMD, cmd.getHandleCommandIndex(cmd.getCommand()));
+        sendBroadcast(GattCommand);
+    }
+    private void sendACK(Packet rPacket,boolean error){
         Packet.L1Header l1Header = new Packet.L1Header();
         l1Header.setLength((short)0);
         l1Header.setACK(true);
@@ -179,7 +204,7 @@ public class PacketParserService extends Service {
         send(send_packet);
         resent_cnt = 3;
     }
-    public void getAlarmList(){
+    public void getAlarms(){
         Packet.PacketValue packetValue = new Packet.PacketValue();
         packetValue.setCommandId((byte) (0x02));
         packetValue.setKey((byte) (0x03));
@@ -197,7 +222,6 @@ public class PacketParserService extends Service {
         send_packet.print();
         send(send_packet);
         resent_cnt = 3;
-
     }
     public static class UserProfile{
         public int Sex;
@@ -255,6 +279,16 @@ public class PacketParserService extends Service {
         send(send_packet);
         resent_cnt = 3;
     }
+    public static class DailyData{
+        int Steps;
+        int Distance;
+        int Calory;
+    }
+
+    public DailyData getDailyDataList() {
+        return mDailyData;
+    }
+
     public void getDailyData(){
         Packet.PacketValue packetValue = new Packet.PacketValue();
         packetValue.setCommandId((byte) (0x05));
@@ -264,6 +298,7 @@ public class PacketParserService extends Service {
         send(send_packet);
         resent_cnt = 3;
     }
+
     public void setSYNC(byte sync){
         Packet.PacketValue packetValue = new Packet.PacketValue();
         packetValue.setCommandId((byte) (0x05));
@@ -403,7 +438,7 @@ public class PacketParserService extends Service {
         send_packet.print();
         send(send_packet);
     }
-    public void send(Packet packet){
+    private void send(Packet packet){
 
         final Packet packet1 = packet;
         new Thread(new Runnable(){
@@ -439,7 +474,7 @@ public class PacketParserService extends Service {
         },"Tread-BLESend").start();
     }
 
-    public void resolve(Packet.PacketValue packetValue){
+    private void resolve(Packet.PacketValue packetValue){
         switch (packetValue.getCommandId()){
             case 2:
                 switch (packetValue.getKey()){
@@ -496,6 +531,20 @@ public class PacketParserService extends Service {
 
                     case 8:
                         //同步结束
+                        break;
+                    case 9:
+                        mDailyData.Steps = data[0]&0xFF;
+                        mDailyData.Steps = mDailyData.Steps<<8 | data[1]&0xFF;
+                        mDailyData.Steps = mDailyData.Steps<<8 | data[2]&0xFF;
+                        mDailyData.Steps = mDailyData.Steps<<8 | data[3]&0xFF;
+                        mDailyData.Distance = data[4]&0xFF;
+                        mDailyData.Distance = mDailyData.Steps<<8 | data[5]&0xFF;
+                        mDailyData.Distance = mDailyData.Steps<<8 | data[6]&0xFF;
+                        mDailyData.Distance = mDailyData.Steps<<8 | data[7]&0xFF;
+                        mDailyData.Calory = data[8]&0xFF;
+                        mDailyData.Calory = mDailyData.Steps<<8 | data[9]&0xFF;
+                        mDailyData.Calory = mDailyData.Steps<<8 | data[10]&0xFF;
+                        mDailyData.Calory = mDailyData.Steps<<8 | data[11]&0xFF;
                         break;
                     default:
                         Log.i(BluetoothLeService.TAG,"sportData get");
@@ -560,6 +609,18 @@ public class PacketParserService extends Service {
                     default:
                         break;
                 }
+            }
+            else if(BluetoothLeService.ACTION_GATT_SERVICES_DISCOVERED.equals(action)){
+                BluetoothLeService.HandleCommand cmd = BluetoothLeService.HandleCommand.NUS_TX_SET_NOTIFICATION;
+                GattCommand.putExtra(BluetoothLeService.HandleCMD, cmd.getIndex());
+                GattCommand.putExtra(BluetoothLeService.HandleData, true);
+                sendBroadcast(GattCommand);
+            }
+            else if(BluetoothLeService.ACTION_GATT_CONNECTED.equals(action)){
+                BLE_CONNECT_STATUS = true;
+            }
+            else if (BluetoothLeService.ACTION_GATT_DISCONNECTED.equals(action)){
+                BLE_CONNECT_STATUS = false;
             }
             else if (BluetoothLeService.ACTION_GATT_IDLE.equals(action)){
                 GattStatus = 0;

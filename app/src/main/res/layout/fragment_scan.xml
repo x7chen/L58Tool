@@ -1,12 +1,23 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
-    android:layout_height="match_parent" tools:context="com.momo.dev.l58tool.ScanFragment">
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.momo.dev.l58tool.ScanFragment"
+    android:orientation="vertical">
 
     <!-- TODO: Update blank fragment layout -->
 
     <ListView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:id="@+id/listView_Device"
-        android:layout_gravity="left|top" />
-</FrameLayout>
+        android:layout_height="439dp"
+        android:id="@+id/listView_Device" />
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/button_scan"
+        android:layout_gravity="bottom|center_horizontal"
+        android:text="Scan"
+        android:padding="20dp" />
+
+</LinearLayout>

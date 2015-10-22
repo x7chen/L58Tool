@@ -188,10 +188,6 @@ public class BluetoothLeService extends Service {
         public void onCharacteristicWrite(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
             Log.i(TAG,"onCharacteristicWrite status:"+String.valueOf(status));
             super.onCharacteristicWrite(gatt, characteristic, status);
-
-                //gatt.executeReliableWrite();
-            Log.i(TAG, "executeReliableWrite");
-
         }
 
         @Override

@@ -16,6 +16,7 @@ import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,20 +32,9 @@ public class TestFragment extends Fragment {
     private String mParam2;
 
     Intent PacketHandle = new Intent(PacketParserService.ACTION_PACKET_HANDLE);
-
+    public PacketParserService packetParserService;
     private TestItemAdapter mtestItemAdapter;
-    PacketParserService packetParserService;
-    ServiceConnection connection = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
-            packetParserService = ((PacketParserService.LocalBinder)service).getService();
-        }
 
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-
-        }
-    };
     /**
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
@@ -66,6 +56,10 @@ public class TestFragment extends Fragment {
     public TestFragment() {
         // Required empty public constructor
     }
+    @Override
+    public void onResume() {
+        super.onResume();
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -84,8 +78,7 @@ public class TestFragment extends Fragment {
         mtestItemAdapter.addItem(new TestItem("设置防丢",""));
         mtestItemAdapter.addItem(new TestItem("设置久坐",""));
         mtestItemAdapter.addItem(new TestItem("获取当日数据",""));
-        Intent intent_packet = new Intent(getActivity(),PacketParserService.class);
-        getActivity().bindService(intent_packet,connection, Service.BIND_AUTO_CREATE);
+
     }
 
     @Override
@@ -98,6 +91,18 @@ public class TestFragment extends Fragment {
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+
+                if(packetParserService == null){
+                    packetParserService = ((MainActivity)getActivity()).getPacketParserService();
+                    if(packetParserService == null) {
+                        Toast.makeText(getActivity(),"getPacketParserService is null.",Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                    else {
+                        Toast.makeText(getActivity(),"getPacketParserService is ready.",Toast.LENGTH_SHORT).show();
+                    }
+                }
+
                 switch (position){
                     case 0:
                         packetParserService.setTime();
@@ -119,7 +124,7 @@ public class TestFragment extends Fragment {
                         packetParserService.setAlarmList(alarmList);
                         break;
                     case 3:
-                        packetParserService.getAlarmList();
+                        packetParserService.getAlarms();
                         break;
                     case 4:
                         packetParserService.setTarget(1000);
@@ -147,6 +152,9 @@ public class TestFragment extends Fragment {
                         break;
                     case 8:
                         packetParserService.getDailyData();
+                        break;
+                    case 9:
+//                        packetParserService.
                         break;
                     default:
 //                        PacketHandle.putExtra(PacketParserService.HANDLE,position+1);

@@ -18,6 +18,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -72,6 +73,7 @@ public class ScanFragment extends Fragment {
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
 
+
     }
 
     @Override
@@ -93,15 +95,28 @@ public class ScanFragment extends Fragment {
                     mScanning = false;
                 }
                 if (ScanFragment.BLE_CONNECT_STATUS == false) {
-                    cmd= BluetoothLeService.HandleCommand.NORDIC_BLE_CONNECT;
+                    cmd = BluetoothLeService.HandleCommand.NORDIC_BLE_CONNECT;
                     GattCommand.putExtra(BluetoothLeService.HandleCMD, cmd.getHandleCommandIndex(cmd.getCommand()));
                     GattCommand.putExtra(BluetoothLeService.HandleDeviceAddress, device.getAddress());
                     getActivity().sendBroadcast(GattCommand);
                 } else {
-                    cmd= BluetoothLeService.HandleCommand.NORDIC_BLE_DISCONNECT;
+                    cmd = BluetoothLeService.HandleCommand.NORDIC_BLE_DISCONNECT;
                     GattCommand.putExtra(BluetoothLeService.HandleCMD, cmd.getHandleCommandIndex(cmd.getCommand()));
                     getActivity().sendBroadcast(GattCommand);
                 }
+            }
+        });
+        Button bt_scan = (Button)(rootview.findViewById(R.id.button_scan));
+        bt_scan.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (ScanFragment.BLE_CONNECT_STATUS == false) {
+                    mBluetoothAdapter = MainActivity.mBluetoothAdapter;
+                    mHandler = new Handler();
+                    // Initializes list view adapter.
+                    scanLeDevice(true);
+                }
+
             }
         });
         return rootview;
@@ -110,21 +125,13 @@ public class ScanFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        if(ScanFragment.BLE_CONNECT_STATUS == false) {
-            mBluetoothAdapter = MainActivity.mBluetoothAdapter;
-            mHandler = new Handler();
-            // Initializes list view adapter.
-            scanLeDevice(true);
-        }
+
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        if(ScanFragment.BLE_CONNECT_STATUS == false) {
-            scanLeDevice(false);
-            mLeDeviceListAdapter.clear();
-        }
+
     }
 
     @Override

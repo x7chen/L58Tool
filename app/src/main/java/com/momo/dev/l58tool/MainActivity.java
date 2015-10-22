@@ -1,13 +1,17 @@
 package com.momo.dev.l58tool;
 
+import android.app.Service;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothManager;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
@@ -31,11 +35,29 @@ public class MainActivity extends AppCompatActivity implements ActionBar.TabList
 
     Intent GattCommand = new Intent(BluetoothLeService.ACTION_GATT_HANDLE);
 
+    public PacketParserService packetParserService;
+    ServiceConnection connection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            packetParserService = ((PacketParserService.LocalBinder)service).getService();
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+
+        }
+    };
+
+    public PacketParserService getPacketParserService() {
+        return packetParserService;
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
+        Intent intent_packet = new Intent(this,PacketParserService.class);
+        bindService(intent_packet, connection, Service.BIND_AUTO_CREATE);
 
         // Use this check to determine whether BLE is supported on the device.  Then you can
         // selectively disable BLE-related features.
@@ -49,8 +71,8 @@ public class MainActivity extends AppCompatActivity implements ActionBar.TabList
         testfragment = TestFragment.newInstance("1","2");
         logfragment = LogFragment.newInstance("1","2");
 
-        final Intent intent = new Intent(this,BluetoothLeService.class);
-        startService(intent);
+//        final Intent intent = new Intent(this,BluetoothLeService.class);
+//        startService(intent);
 
 //        Intent intent_packet = new Intent(this,PacketParserService.class);
 //        startService(intent_packet);
@@ -228,12 +250,6 @@ public class MainActivity extends AppCompatActivity implements ActionBar.TabList
             final String action = intent.getAction();
             if(BluetoothLeService.ACTION_DATA_AVAILABLE.equals(action)){
 
-            }
-            else if(BluetoothLeService.ACTION_GATT_SERVICES_DISCOVERED.equals(action)){
-                BluetoothLeService.HandleCommand cmd = BluetoothLeService.HandleCommand.NUS_TX_SET_NOTIFICATION;
-                GattCommand.putExtra(BluetoothLeService.HandleCMD, cmd.getIndex());
-                GattCommand.putExtra(BluetoothLeService.HandleData, true);
-                sendBroadcast(GattCommand);
             }
             else if(BluetoothLeService.ACTION_GATT_CONNECTED.equals(action)){
                 ScanFragment.BLE_CONNECT_STATUS = true;
