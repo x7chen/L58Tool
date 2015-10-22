@@ -444,7 +444,7 @@ public class PacketParserService extends Service {
         new Thread(new Runnable(){
             @Override
             public void run() {
-                final int packLength = 12;
+                final int packLength = 20;
                 byte[] data = packet1.getPacket();
                 int lastLength = data.length;
                 byte[] sendData;

@@ -154,7 +154,7 @@ public class TestFragment extends Fragment {
                         packetParserService.getDailyData();
                         break;
                     case 9:
-//                        packetParserService.
+//                        packetParserService
                         break;
                     default:
 //                        PacketHandle.putExtra(PacketParserService.HANDLE,position+1);

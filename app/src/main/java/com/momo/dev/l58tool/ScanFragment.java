@@ -34,6 +34,8 @@ public class ScanFragment extends Fragment {
     private String mParam1;
     private String mParam2;
 
+    public PacketParserService packetParserService;
+
     Intent GattCommand = new Intent(BluetoothLeService.ACTION_GATT_HANDLE);
 
     private LeDeviceListAdapter mLeDeviceListAdapter;
@@ -94,15 +96,20 @@ public class ScanFragment extends Fragment {
                     mBluetoothAdapter.stopLeScan(mLeScanCallback);
                     mScanning = false;
                 }
+                if(packetParserService == null){
+                    packetParserService = ((MainActivity)getActivity()).getPacketParserService();
+                    if(packetParserService == null) {
+                        Toast.makeText(getActivity(),"getPacketParserService is null.",Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                    else {
+                        Toast.makeText(getActivity(),"getPacketParserService is ready.",Toast.LENGTH_SHORT).show();
+                    }
+                }
                 if (ScanFragment.BLE_CONNECT_STATUS == false) {
-                    cmd = BluetoothLeService.HandleCommand.NORDIC_BLE_CONNECT;
-                    GattCommand.putExtra(BluetoothLeService.HandleCMD, cmd.getHandleCommandIndex(cmd.getCommand()));
-                    GattCommand.putExtra(BluetoothLeService.HandleDeviceAddress, device.getAddress());
-                    getActivity().sendBroadcast(GattCommand);
+                    packetParserService.connect(device.getAddress());
                 } else {
-                    cmd = BluetoothLeService.HandleCommand.NORDIC_BLE_DISCONNECT;
-                    GattCommand.putExtra(BluetoothLeService.HandleCMD, cmd.getHandleCommandIndex(cmd.getCommand()));
-                    getActivity().sendBroadcast(GattCommand);
+                    packetParserService.disconnect();
                 }
             }
         });
