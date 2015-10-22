@@ -39,7 +39,7 @@ public class PacketParserService extends Service {
     private List<SportData> mSportData = new ArrayList<SportData>();
     private List<SleepData> mSleepData = new ArrayList<SleepData>();
     private List<SleepSetting> mSleepSetting = new ArrayList<SleepSetting>();
-    DailyData mDailyData = new DailyData();
+    private DailyData mDailyData = new DailyData();
 
     private LocalBinder mBinder = new LocalBinder();
     @Nullable
@@ -500,7 +500,7 @@ public class PacketParserService extends Service {
                         //获取运动数据
                         mSportData.clear();
                         header = Arrays.copyOfRange(data,0,2);
-                        for(int i=2;i<length;i+=8){
+                        for(int i=4;i<length;i+=8){
                             mSportData.add(SportDataFromByte(header,Arrays.copyOfRange(data,i,i+8)));
                         }
 
@@ -510,7 +510,7 @@ public class PacketParserService extends Service {
                         //获取睡眠数据
                         //mSleepData.clear();
                         header = Arrays.copyOfRange(data,0,2);
-                        for (int i = 2; i < length; i +=4){
+                        for (int i = 4; i < length; i +=4){
                             mSleepData.add(SleepDataFromByte(header,Arrays.copyOfRange(data,i,i+4)));
                         }
                         break;
@@ -519,7 +519,7 @@ public class PacketParserService extends Service {
                         //获取睡眠设定
                         //mSleepSetting.clear();
                         header = Arrays.copyOfRange(data,0,2);
-                        for(int i=2;i<length;i+=4){
+                        for(int i=4;i<length;i+=4){
                             mSleepSetting.add(SleepSettingFromByte(header, Arrays.copyOfRange(data, i, i + 4)));
                         }
                         break;
@@ -618,9 +618,13 @@ public class PacketParserService extends Service {
             }
             else if(BluetoothLeService.ACTION_GATT_CONNECTED.equals(action)){
                 BLE_CONNECT_STATUS = true;
+                receive_packet.clear();
+                send_packet.clear();
             }
             else if (BluetoothLeService.ACTION_GATT_DISCONNECTED.equals(action)){
                 BLE_CONNECT_STATUS = false;
+                receive_packet.clear();
+                send_packet.clear();
             }
             else if (BluetoothLeService.ACTION_GATT_IDLE.equals(action)){
                 GattStatus = 0;
