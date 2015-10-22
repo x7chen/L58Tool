@@ -22,7 +22,7 @@ import java.util.List;
  */
 public class PacketParserService extends Service {
 
-    private int mVERSION = 100;
+    private int mVERSION = 101;
 
     public final static String ACTION_PACKET_HANDLE =
             "com.momo.dev.l58tool.packet.parser.ACTION_PACKET_HANDLE";
@@ -533,18 +533,18 @@ public class PacketParserService extends Service {
                         //同步结束
                         break;
                     case 9:
-                        mDailyData.Steps = data[0]&0xFF;
-                        mDailyData.Steps = (mDailyData.Steps << 8) | (data[1]&0xFF);
-                        mDailyData.Steps = (mDailyData.Steps << 8) | (data[2]&0xFF);
-                        mDailyData.Steps = (mDailyData.Steps << 8) | (data[3]&0xFF);
-                        mDailyData.Distance = data[4]&0xFF;
-                        mDailyData.Distance = (mDailyData.Steps << 8) | (data[5]&0xFF);
-                        mDailyData.Distance = (mDailyData.Steps << 8) | (data[6]&0xFF);
-                        mDailyData.Distance = (mDailyData.Steps << 8) | (data[7]&0xFF);
-                        mDailyData.Calory = data[8]&0xFF;
-                        mDailyData.Calory = (mDailyData.Steps << 8) | (data[9]&0xFF);
-                        mDailyData.Calory = (mDailyData.Steps << 8) | (data[10]&0xFF);
-                        mDailyData.Calory = (mDailyData.Steps << 8) | (data[11]&0xFF);
+                        mDailyData.Steps = data[0] & 0xFF;
+                        mDailyData.Steps = (mDailyData.Steps << 8) | (data[1] & 0xFF);
+                        mDailyData.Steps = (mDailyData.Steps << 8) | (data[2] & 0xFF);
+                        mDailyData.Steps = (mDailyData.Steps << 8) | (data[3] & 0xFF);
+                        mDailyData.Distance = data[4] & 0xFF;
+                        mDailyData.Distance = (mDailyData.Distance << 8) | (data[5] & 0xFF);
+                        mDailyData.Distance = (mDailyData.Distance << 8) | (data[6] & 0xFF);
+                        mDailyData.Distance = (mDailyData.Distance << 8) | (data[7] & 0xFF);
+                        mDailyData.Calory = data[8] & 0xFF;
+                        mDailyData.Calory = (mDailyData.Calory << 8) | (data[9] & 0xFF);
+                        mDailyData.Calory = (mDailyData.Calory << 8) | (data[10] & 0xFF);
+                        mDailyData.Calory = (mDailyData.Calory << 8) | (data[11] & 0xFF);
                         break;
                     default:
                         Log.i(BluetoothLeService.TAG,"sportData get");
