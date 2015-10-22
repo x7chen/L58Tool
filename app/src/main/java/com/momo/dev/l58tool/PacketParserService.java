@@ -557,56 +557,6 @@ public class PacketParserService extends Service {
                 int handle = intent.getIntExtra(HANDLE,0);
                 switch (handle){
                     case 0:
-                        break;
-                    case 1:
-                        setTime();
-                        break;
-                    case 2:
-                        getSportData();
-                        break;
-                    case 3:
-                        List<Alarm> alarmList = new ArrayList<Alarm>();
-                        Alarm alarm = new Alarm();
-                        alarm.Year = 2015;
-                        alarm.Month = 11;
-                        alarm.Day = 21;
-                        alarm.Hour = 15;
-                        alarm.Minute = 0;
-                        alarm.Repeat = 0x7F;
-                        alarm.ID = 0;
-                        alarmList.add(alarm);
-                        setAlarmList(alarmList);
-                        break;
-                    case 4:
-                        getAlarmList();
-                        break;
-                    case 5:
-                        setTarget(1000);
-                        break;
-                    case 6:
-                        UserProfile userProfile = new UserProfile();
-                        userProfile.Sex = 1;
-                        userProfile.Age = 30;
-                        userProfile.Stature = 340;
-                        userProfile.Weight = 200;
-                        setUserProfile(userProfile);
-                        break;
-                    case 7:
-                        setLossAlert(1);
-                        break;
-                    case 8:
-                        LongSitSetting longSitSetting = new LongSitSetting();
-                        longSitSetting.Enable = 1;
-                        longSitSetting.Threshold = 100;
-                        longSitSetting.DurationTime = 30;
-                        longSitSetting.StartTime = 60;
-                        longSitSetting.EndTime = 80;
-                        longSitSetting.Repeat = 0x7F;
-                        setLongSit(longSitSetting);
-                        break;
-                    case 9:
-                        getDailyData();
-                        break;
                     default:
                         break;
                 }
