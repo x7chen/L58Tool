@@ -52,8 +52,8 @@ public class MainActivity extends AppCompatActivity implements ActionBar.TabList
         final Intent intent = new Intent(this,BluetoothLeService.class);
         startService(intent);
 
-        Intent intent_packet = new Intent(this,PacketParserService.class);
-        startService(intent_packet);
+//        Intent intent_packet = new Intent(this,PacketParserService.class);
+//        startService(intent_packet);
 
         registerReceiver(MyReceiver, MyIntentFilter());
         // Initializes a Bluetooth adapter.  For API level 18 and above, get a reference to

@@ -1,9 +1,13 @@
 package com.momo.dev.l58tool;
 
 import android.app.Activity;
+import android.app.Service;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,6 +18,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class TestFragment extends Fragment {
     // TODO: Rename parameter arguments, choose names that match
@@ -27,7 +32,19 @@ public class TestFragment extends Fragment {
 
     Intent PacketHandle = new Intent(PacketParserService.ACTION_PACKET_HANDLE);
 
-private TestItemAdapter mtestItemAdapter;
+    private TestItemAdapter mtestItemAdapter;
+    PacketParserService packetParserService;
+    ServiceConnection connection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            packetParserService = ((PacketParserService.LocalBinder)service).getService();
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+
+        }
+    };
     /**
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
@@ -67,6 +84,8 @@ private TestItemAdapter mtestItemAdapter;
         mtestItemAdapter.addItem(new TestItem("设置防丢",""));
         mtestItemAdapter.addItem(new TestItem("设置久坐",""));
         mtestItemAdapter.addItem(new TestItem("获取当日数据",""));
+        Intent intent_packet = new Intent(getActivity(),PacketParserService.class);
+        getActivity().bindService(intent_packet,connection, Service.BIND_AUTO_CREATE);
     }
 
     @Override
@@ -81,20 +100,57 @@ private TestItemAdapter mtestItemAdapter;
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 switch (position){
                     case 0:
-                        PacketHandle.putExtra(PacketParserService.HANDLE,1);
-                        getActivity().sendBroadcast(PacketHandle);
+                        packetParserService.setTime();
                         break;
                     case 1:
-                        PacketHandle.putExtra(PacketParserService.HANDLE,2);
-                        getActivity().sendBroadcast(PacketHandle);
+                        packetParserService.getSportData();
                         break;
                     case 2:
-                        PacketHandle.putExtra(PacketParserService.HANDLE,3);
-                        getActivity().sendBroadcast(PacketHandle);
-
+                        List<PacketParserService.Alarm> alarmList = new ArrayList<PacketParserService.Alarm>();
+                        PacketParserService.Alarm alarm = new PacketParserService.Alarm();
+                        alarm.Year = 2015;
+                        alarm.Month = 11;
+                        alarm.Day = 21;
+                        alarm.Hour = 15;
+                        alarm.Minute = 0;
+                        alarm.Repeat = 0x7F;
+                        alarm.ID = 0;
+                        alarmList.add(alarm);
+                        packetParserService.setAlarmList(alarmList);
+                        break;
+                    case 3:
+                        packetParserService.getAlarmList();
+                        break;
+                    case 4:
+                        packetParserService.setTarget(1000);
+                        break;
+                    case 5:
+                        PacketParserService.UserProfile userProfile = new PacketParserService.UserProfile();
+                        userProfile.Sex = 1;
+                        userProfile.Age = 30;
+                        userProfile.Stature = 340;
+                        userProfile.Weight = 200;
+                        packetParserService.setUserProfile(userProfile);
+                        break;
+                    case 6:
+                        packetParserService.setLossAlert(1);
+                        break;
+                    case 7:
+                        PacketParserService.LongSitSetting longSitSetting = new PacketParserService.LongSitSetting();
+                        longSitSetting.Enable = 1;
+                        longSitSetting.Threshold = 100;
+                        longSitSetting.DurationTime = 30;
+                        longSitSetting.StartTime = 60;
+                        longSitSetting.EndTime = 80;
+                        longSitSetting.Repeat = 0x7F;
+                        packetParserService.setLongSit(longSitSetting);
+                        break;
+                    case 8:
+                        packetParserService.getDailyData();
+                        break;
                     default:
-                        PacketHandle.putExtra(PacketParserService.HANDLE,position+1);
-                        getActivity().sendBroadcast(PacketHandle);
+//                        PacketHandle.putExtra(PacketParserService.HANDLE,position+1);
+//                        getActivity().sendBroadcast(PacketHandle);
                         break;
                 }
             }

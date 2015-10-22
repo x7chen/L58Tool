@@ -45,7 +45,7 @@ public class PacketParserService extends Service {
         return mBinder;
     }
     public class LocalBinder extends Binder {
-        Service getService() {
+        public PacketParserService getService() {
             return PacketParserService.this;
         }
     }
@@ -69,6 +69,32 @@ public class PacketParserService extends Service {
     public int getVersion(){
         return mVERSION;
     }
+
+    public List<SportData> getSportDataList() {
+        List<SportData> nSportData = new ArrayList<SportData>();
+        nSportData.addAll(mSportData);
+        mSportData.clear();
+        return nSportData;
+    }
+
+    public List<SleepData> getSleepDataList(){
+        List<SleepData> nSleepData = new ArrayList<SleepData>();
+        nSleepData.addAll(mSleepData);
+        mSleepData.clear();
+        return nSleepData;
+    }
+
+    public List<SleepSetting> getSleepSettingList() {
+        List<SleepSetting> nSleepSetting = new ArrayList<SleepSetting>();
+        nSleepSetting.addAll(mSleepSetting);
+        mSleepSetting.clear();
+        return nSleepSetting;
+    }
+
+    public List<Alarm> getAlarmsList() {
+        return mAlarms;
+    }
+
     public void setTime(){
         Calendar calendar = Calendar.getInstance();
         int year = calendar.get(Calendar.YEAR);
