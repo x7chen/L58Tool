@@ -99,6 +99,9 @@ public class Packet {
     public void append(byte[] data){
         Byte[] aData = byteArrayBox(data);
         mPacket.addAll(Arrays.asList(aData));
+        if(mPacket.size()>512) {
+            mPacket.clear();
+        }
         //checkPacket();
     }
     public int checkPacket(){
@@ -243,64 +246,98 @@ public class Packet {
         }
     }
     static public class PacketValue implements Cloneable{
-        List<Byte> PacketValue;
+        List<Byte> aPacketValue;
         public PacketValue(){
-            PacketValue = new ArrayList<Byte>();
-            //PacketValue.clear();
+            aPacketValue = new ArrayList<Byte>();
+            aPacketValue.add((byte) 0);
+            aPacketValue.add((byte) 0);
+            aPacketValue.add((byte) 0);
+            aPacketValue.add((byte) 0);
+            aPacketValue.add((byte) 0);
         }
         public PacketValue(List<Byte> aData){
-            PacketValue = aData;
+            aPacketValue = aData;
         }
         public void setCommandId(byte commandid){
-            PacketValue.add(0, commandid);
-            PacketValue.add(1, (byte) 0x00);
+            aPacketValue.set(0, commandid);
+            aPacketValue.set(1, (byte) 0x00);
         }
         byte getCommandId(){
-            return PacketValue.get(0);
+            return aPacketValue.get(0);
         }
         public void setKey(byte key){
-            PacketValue.add(2, key);
-            PacketValue.set(2, key);
+            aPacketValue.set(2, key);
         }
         byte getKey(){
-            return PacketValue.get(2);
+            return aPacketValue.get(2);
         }
         public void setValueLength(short lenth){
             byte[] len = shortToByte(lenth);
-            PacketValue.add(3, len[0]);
-            PacketValue.add(4, len[1]);
+            aPacketValue.set(3, len[0]);
+            aPacketValue.set(4, len[1]);
         }
         short getValueLength(){
             int value ;
-            value = PacketValue.get(3)&0x000000ff;
+            value = aPacketValue.get(3)&0x000000ff;
             value = value << 8 ;
-            value |= PacketValue.get(4)&0x000000ff;
+            value |= aPacketValue.get(4)&0x000000ff;
             return (short)value;
         }
         public void setValue(byte[] value){
-            int intex = PacketValue.size();
-            if(intex == 5){
-                for (byte b:value) {
-                    PacketValue.add(b);
-                }
+
+            if (aPacketValue.size()==0){
+                aPacketValue.add((byte)0);
+                aPacketValue.add((byte)0);
+                aPacketValue.add((byte)0);
+                aPacketValue.add((byte)0);
+                aPacketValue.add((byte)0);
+            }
+
+            List<Byte> nPacketValue = new ArrayList<Byte>();
+            nPacketValue.addAll(aPacketValue.subList(0, 5));
+            if(value == null){
+
             }
             else {
-                Log.e(TAG,"assemble PacketValue error!");
+                for (byte b:value) {
+                    nPacketValue.add(b);
+                }
             }
+            aPacketValue = nPacketValue;
+            setValueLength((short)(aPacketValue.size()-5));
+        }
+        public byte[] getValue(){
+            if(aPacketValue.size() < 6){
+                return null;
+            }
+            return Arrays.copyOfRange(byteArrayUnBox(this.toArray()),5,aPacketValue.size());
+        }
+        public void appendValue(byte[] value){
+            if (aPacketValue.size()==0){
+                aPacketValue.add((byte)0);
+                aPacketValue.add((byte)0);
+                aPacketValue.add((byte)0);
+                aPacketValue.add((byte)0);
+                aPacketValue.add((byte)0);
+            }
+            for (byte b:value){
+                aPacketValue.add(b);
+            }
+            setValueLength((short)(aPacketValue.size()-5));
         }
         public void setPacketValue(byte[] value){
-            PacketValue.clear();
+            aPacketValue.clear();
             for (byte b:value){
-                PacketValue.add(b);
+                aPacketValue.add(b);
             }
 
         }
         public List<Byte> toList(){
-            return PacketValue;
+            return aPacketValue;
         }
         public Byte[] toArray(){
-            Byte[] value = new Byte[PacketValue.size()];
-            PacketValue.toArray(value);
+            Byte[] value = new Byte[aPacketValue.size()];
+            aPacketValue.toArray(value);
             return value;
         }
 
@@ -351,7 +388,11 @@ public class Packet {
             return (short)crc;
         }
     }
-
+    static public byte[] byteToByte(byte value) {
+        byte[] abyte = new byte[1];
+        abyte[0] = (byte) ((0x00ff & value)>>0);
+        return abyte;
+    }
     static public byte[] shortToByte(short value) {
         byte[] abyte = new byte[2];
         abyte[0] = (byte) ((0xff00 & value)>>8);

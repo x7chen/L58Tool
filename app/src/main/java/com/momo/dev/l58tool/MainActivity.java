@@ -7,7 +7,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
-import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -15,7 +14,6 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
@@ -54,7 +52,7 @@ public class MainActivity extends AppCompatActivity implements ActionBar.TabList
         final Intent intent = new Intent(this,BluetoothLeService.class);
         startService(intent);
 
-        Intent intent_packet = new Intent(this,PacketParser.class);
+        Intent intent_packet = new Intent(this,PacketParserService.class);
         startService(intent_packet);
 
         registerReceiver(MyReceiver, MyIntentFilter());

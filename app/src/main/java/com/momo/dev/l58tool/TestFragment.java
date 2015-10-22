@@ -3,7 +3,6 @@ package com.momo.dev.l58tool;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -26,7 +25,7 @@ public class TestFragment extends Fragment {
     private String mParam1;
     private String mParam2;
 
-    Intent PacketHandle = new Intent(PacketParser.ACTION_PACKET_HANDLE);
+    Intent PacketHandle = new Intent(PacketParserService.ACTION_PACKET_HANDLE);
 
 private TestItemAdapter mtestItemAdapter;
     /**
@@ -59,10 +58,15 @@ private TestItemAdapter mtestItemAdapter;
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
         mtestItemAdapter = new TestItemAdapter(getActivity());
-        mtestItemAdapter.addItem(new TestItem("设置时间","通过"));
-        mtestItemAdapter.addItem(new TestItem("G-Sensor", "未通过"));
-
-
+        mtestItemAdapter.addItem(new TestItem("设置时间",""));
+        mtestItemAdapter.addItem(new TestItem("获取运动数据", ""));
+        mtestItemAdapter.addItem(new TestItem("设置闹钟",""));
+        mtestItemAdapter.addItem(new TestItem("获取闹钟",""));
+        mtestItemAdapter.addItem(new TestItem("设置目标",""));
+        mtestItemAdapter.addItem(new TestItem("设置用户信息",""));
+        mtestItemAdapter.addItem(new TestItem("设置防丢",""));
+        mtestItemAdapter.addItem(new TestItem("设置久坐",""));
+        mtestItemAdapter.addItem(new TestItem("获取当日数据",""));
     }
 
     @Override
@@ -77,14 +81,20 @@ private TestItemAdapter mtestItemAdapter;
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 switch (position){
                     case 0:
-                        PacketHandle.putExtra(PacketParser.HANDLE,1);
+                        PacketHandle.putExtra(PacketParserService.HANDLE,1);
                         getActivity().sendBroadcast(PacketHandle);
                         break;
                     case 1:
-                        PacketHandle.putExtra(PacketParser.HANDLE,2);
+                        PacketHandle.putExtra(PacketParserService.HANDLE,2);
                         getActivity().sendBroadcast(PacketHandle);
                         break;
+                    case 2:
+                        PacketHandle.putExtra(PacketParserService.HANDLE,3);
+                        getActivity().sendBroadcast(PacketHandle);
+
                     default:
+                        PacketHandle.putExtra(PacketParserService.HANDLE,position+1);
+                        getActivity().sendBroadcast(PacketHandle);
                         break;
                 }
             }
