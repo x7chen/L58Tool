@@ -534,17 +534,17 @@ public class PacketParserService extends Service {
                         break;
                     case 9:
                         mDailyData.Steps = data[0]&0xFF;
-                        mDailyData.Steps = mDailyData.Steps<<8 | data[1]&0xFF;
-                        mDailyData.Steps = mDailyData.Steps<<8 | data[2]&0xFF;
-                        mDailyData.Steps = mDailyData.Steps<<8 | data[3]&0xFF;
+                        mDailyData.Steps = (mDailyData.Steps << 8) | (data[1]&0xFF);
+                        mDailyData.Steps = (mDailyData.Steps << 8) | (data[2]&0xFF);
+                        mDailyData.Steps = (mDailyData.Steps << 8) | (data[3]&0xFF);
                         mDailyData.Distance = data[4]&0xFF;
-                        mDailyData.Distance = mDailyData.Steps<<8 | data[5]&0xFF;
-                        mDailyData.Distance = mDailyData.Steps<<8 | data[6]&0xFF;
-                        mDailyData.Distance = mDailyData.Steps<<8 | data[7]&0xFF;
+                        mDailyData.Distance = (mDailyData.Steps << 8) | (data[5]&0xFF);
+                        mDailyData.Distance = (mDailyData.Steps << 8) | (data[6]&0xFF);
+                        mDailyData.Distance = (mDailyData.Steps << 8) | (data[7]&0xFF);
                         mDailyData.Calory = data[8]&0xFF;
-                        mDailyData.Calory = mDailyData.Steps<<8 | data[9]&0xFF;
-                        mDailyData.Calory = mDailyData.Steps<<8 | data[10]&0xFF;
-                        mDailyData.Calory = mDailyData.Steps<<8 | data[11]&0xFF;
+                        mDailyData.Calory = (mDailyData.Steps << 8) | (data[9]&0xFF);
+                        mDailyData.Calory = (mDailyData.Steps << 8) | (data[10]&0xFF);
+                        mDailyData.Calory = (mDailyData.Steps << 8) | (data[11]&0xFF);
                         break;
                     default:
                         Log.i(BluetoothLeService.TAG,"sportData get");
