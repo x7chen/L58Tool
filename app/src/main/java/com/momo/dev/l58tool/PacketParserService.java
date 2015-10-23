@@ -434,18 +434,18 @@ public class PacketParserService extends Service {
         packetValue.setCommandId((byte) (0x05));
         packetValue.setKey((byte) (0x01));
         packetValue.setValueLength((short) 0x00);
-        send_packet.setPacketValue(packetValue,true);
+        send_packet.setPacketValue(packetValue, true);
         send_packet.print();
         send(send_packet);
+        resent_cnt = 3;
     }
     private void send(Packet packet){
 
-        final Packet packet1 = packet;
+        final byte[] data = packet.getPacket();
         new Thread(new Runnable(){
             @Override
             public void run() {
                 final int packLength = 20;
-                byte[] data = packet1.getPacket();
                 int lastLength = data.length;
                 byte[] sendData;
                 int sendIndex = 0;
@@ -465,7 +465,7 @@ public class PacketParserService extends Service {
                     try {
                         Thread.sleep(50L);
                     }catch (InterruptedException e){
-
+                        e.printStackTrace();
                     }
                     sendBroadcast(GattCommand);
                     GattStatus = 1;

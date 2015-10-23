@@ -99,15 +99,18 @@ public class Packet {
     public void append(byte[] data){
         Byte[] aData = byteArrayBox(data);
         mPacket.addAll(Arrays.asList(aData));
-        if(mPacket.size()>512) {
-            mPacket.clear();
-        }
+
         //checkPacket();
     }
     public int checkPacket(){
+
+        if(mPacket.size()>512) {
+            mPacket.clear();
+        }
         L1Header aL1Header = getL1Header();
         PacketValue aPacketValue = getPacketValue();
         mPacketError = 0;
+
         if( (aL1Header == null)){
             mPacketError = 0x03;
             return mPacketError;
@@ -125,7 +128,7 @@ public class Packet {
             mPacketError = 0x07;
             return mPacketError;
         }
-        if(aL1Header.getLength() != aPacketValue.toList().size()){
+        if(aL1Header.getLength() < aPacketValue.toList().size()){
             mPacketError = 0x09;
             return mPacketError;
         }
