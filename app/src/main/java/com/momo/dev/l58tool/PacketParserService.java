@@ -130,7 +130,7 @@ public class PacketParserService extends Service {
         int second = calendar.get(Calendar.SECOND);
         int aData;
         aData = (year-2000) & 0x3F;
-        aData = aData << 4 | ((month+1) & 0x0F);
+        aData = aData << 4 | ((month + 1) & 0x0F);
         aData = aData << 5 | (day & 0x1F);
         aData = aData << 5 | (hour & 0x1F);
         aData = aData << 6 | (minute & 0x3F);
@@ -342,14 +342,14 @@ public class PacketParserService extends Service {
         SportData sportData = new SportData();
 
         long aData = 0;
-        aData = header[0] &0xFFL;
+        aData = header[0] & 0xFFL;
         aData = (aData << 8) |(header[1] & 0xFFL);
 
-        sportData.Day = (int)(aData &0x1F);
+        sportData.Day = (int)(aData & 0x1F);
         aData >>>= 5;
-        sportData.Month = (int)(aData &0x0F);
+        sportData.Month = (int)(aData & 0x0F);
         aData >>>= 4;
-        sportData.Year = (int)(aData &0x3F) + 2000;
+        sportData.Year = (int)(aData & 0x3F) + 2000;
 
         aData = data[0] & 0xFFL;
         aData = (aData << 8) | (data[1] & 0xFFL);
@@ -360,9 +360,9 @@ public class PacketParserService extends Service {
         aData = (aData << 8) | (data[6] & 0xFFL);
         aData = (aData << 8) | (data[7] & 0xFFL);
 
-        sportData.Distance = (int)(aData &0xFFFF);
+        sportData.Distance = (int)(aData & 0xFFFF);
         aData >>>= 16;
-        sportData.Calory = (int)(aData &0x7FFFF);
+        sportData.Calory = (int)(aData & 0x7FFFF);
         aData >>>= 19;
         sportData.ActiveTime = (int)(aData & 0x0F);
         aData >>>= 4;
@@ -371,8 +371,8 @@ public class PacketParserService extends Service {
         sportData.Mode = (int)(aData & 0x03);
         aData >>>= 2;
         int time = (int)(aData & 0x7FF);
-        sportData.Hour = time/4;
-        sportData.Minute = (time%4) * 15;
+        sportData.Hour = time / 4;
+        sportData.Minute = (time % 4) * 15;
 
         return sportData;
     }
@@ -380,25 +380,25 @@ public class PacketParserService extends Service {
         SleepData sleepData = new SleepData();
 
         long aData = 0;
-        aData = header[0] &0xFFL;
+        aData = header[0] & 0xFFL;
         aData = (aData << 8) |(header[1] & 0xFFL);
 
-        sleepData.Day = (int)(aData &0x1F);
+        sleepData.Day = (int)(aData & 0x1F);
         aData >>>= 5;
-        sleepData.Month = (int)(aData &0x0F);
+        sleepData.Month = (int)(aData & 0x0F);
         aData >>>= 4;
-        sleepData.Year = (int)(aData &0x3F) + 2000;
+        sleepData.Year = (int)(aData & 0x3F) + 2000;
 
         aData = data[0] & 0xFFL;
         aData = (aData << 8) | (data[1] & 0xFFL);
         aData = (aData << 8) | (data[2] & 0xFFL);
         aData = (aData << 8) | (data[3] & 0xFFL);
 
-        sleepData.Mode = (int)(aData &0x0F);
+        sleepData.Mode = (int)(aData & 0x0F);
         aData >>>= 16;
         int time = (int)(aData & 0xFFFF);
-        sleepData.Hour = time/60;
-        sleepData.Minute = time%60;
+        sleepData.Hour = time / 60;
+        sleepData.Minute = time % 60;
 
         return sleepData;
     }
@@ -406,25 +406,25 @@ public class PacketParserService extends Service {
         SleepSetting sleepData = new SleepSetting();
 
         long aData = 0;
-        aData = header[0] &0xFFL;
+        aData = header[0] & 0xFFL;
         aData = (aData << 8) |(header[1] & 0xFFL);
 
-        sleepData.Day = (int)(aData &0x1F);
+        sleepData.Day = (int)(aData & 0x1F);
         aData >>>= 5;
-        sleepData.Month = (int)(aData &0x0F);
+        sleepData.Month = (int)(aData & 0x0F);
         aData >>>= 4;
-        sleepData.Year = (int)(aData &0x3F) + 2000;
+        sleepData.Year = (int)(aData & 0x3F) + 2000;
 
         aData = data[0] & 0xFFL;
         aData = (aData << 8) | (data[1] & 0xFFL);
         aData = (aData << 8) | (data[2] & 0xFFL);
         aData = (aData << 8) | (data[3] & 0xFFL);
 
-        sleepData.Mode = (int)(aData &0x0F);
+        sleepData.Mode = (int)(aData & 0x0F);
         aData >>>= 16;
         int time = (int)(aData & 0xFFFF);
-        sleepData.Hour = time/60;
-        sleepData.Minute = time%60;
+        sleepData.Hour = time / 60;
+        sleepData.Minute = time % 60;
 
         return sleepData;
     }
