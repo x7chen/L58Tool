@@ -86,7 +86,7 @@ public class PacketParserService extends Service {
         l1Header.setACK(true);
         l1Header.setError(error);
         l1Header.setSequenceId(rPacket.getL1Header().getSequenceId());
-        l1Header.setCRC16((short) 0);
+        l1Header.setCRC16((short)0);
         send_packet.setL1Header(l1Header);
         send_packet.setPacketValue(null, false);
         send(send_packet);
@@ -178,15 +178,15 @@ public class PacketParserService extends Service {
         aData >>>= 11;
         alarm.ID = (int)(aData & 0x07);
         aData >>>= 3;
-        alarm.Minute = (int)(aData &0x3F);
+        alarm.Minute = (int)(aData & 0x3F);
         aData >>>= 6;
         alarm.Hour = (int)(aData & 0x1F);
         aData >>>= 5;
         alarm.Day = (int)(aData & 0x1F);
         aData >>>= 5;
-        alarm.Month = (int)(aData &0x0F);
+        alarm.Month = (int)(aData & 0x0F);
         aData >>>= 4;
-        alarm.Year = (int)(aData &0x3F) + 2000;
+        alarm.Year = (int)(aData & 0x3F) + 2000;
         return alarm;
     }
     public void setAlarmList(List<Alarm> alarmList){
@@ -264,17 +264,17 @@ public class PacketParserService extends Service {
     }
     public void setLongSit(LongSitSetting longSit){
         Packet.PacketValue packetValue = new Packet.PacketValue();
-        packetValue.setCommandId((byte) (0x02));
-        packetValue.setKey((byte) (0x21));
+        packetValue.setCommandId((byte)(0x02));
+        packetValue.setKey((byte)(0x21));
         long aData=0;
-        aData = aData<<8  | (longSit.Enable & 0xFF);
-        aData = aData<<16 | (longSit.Threshold & 0xFFFF);
-        aData = aData<<8  | (longSit.DurationTime & 0xFF);
-        aData = aData<<8  | (longSit.StartTime & 0xFF);
-        aData = aData<<8  | (longSit.EndTime & 0xFF);
-        aData = aData<<8  | (longSit.Repeat & 0xFF);
+        aData = aData << 8  | (longSit.Enable & 0xFF);
+        aData = aData << 16 | (longSit.Threshold & 0xFFFF);
+        aData = aData << 8  | (longSit.DurationTime & 0xFF);
+        aData = aData << 8  | (longSit.StartTime & 0xFF);
+        aData = aData << 8  | (longSit.EndTime & 0xFF);
+        aData = aData << 8  | (longSit.Repeat & 0xFF);
         packetValue.setValue(Packet.longToByte(aData));
-        send_packet.setPacketValue(packetValue, true);
+        send_packet.setPacketValue(packetValue,true);
         send_packet.print();
         send(send_packet);
         resent_cnt = 3;
@@ -475,27 +475,27 @@ public class PacketParserService extends Service {
     }
 
     private void resolve(Packet.PacketValue packetValue){
-        switch (packetValue.getCommandId()){
+        byte command = packetValue.getCommandId();
+        byte key = packetValue.getKey();
+        int length = packetValue.getValueLength();
+        byte[] data= packetValue.getValue();
+        switch (command){
             case 2:
-                switch (packetValue.getKey()){
-                    //获取闹钟
+                switch (key){
                     case 4:
-                        int length = packetValue.getValueLength();
-                        byte[] data= packetValue.getValue();
+                        //获取闹钟
+                        for(int i=0;i<length;i+=5) {
+                            mAlarms.add(AlarmFromByte(Arrays.copyOfRange(data, i, i + 5)));
+                        }
                         mAlarms.clear();
-                        for(int i=0;i<length;i+=5)
-                            mAlarms.add(AlarmFromByte(Arrays.copyOfRange(data,i,i+5)));
                         break;
                     default:
                         break;
                 }
                 break;
             case 5:
-                int length = packetValue.getValueLength();
-                byte[] data= packetValue.getValue();
                 byte[] header;
-                switch (packetValue.getKey()){
-
+                switch (key){
                     case 2:
                         //获取运动数据
                         mSportData.clear();
@@ -503,12 +503,10 @@ public class PacketParserService extends Service {
                         for(int i=4;i<length;i+=8){
                             mSportData.add(SportDataFromByte(header,Arrays.copyOfRange(data,i,i+8)));
                         }
-
                         break;
 
                     case 3:
                         //获取睡眠数据
-                        //mSleepData.clear();
                         header = Arrays.copyOfRange(data,0,2);
                         for (int i = 4; i < length; i +=4){
                             mSleepData.add(SleepDataFromByte(header,Arrays.copyOfRange(data,i,i+4)));
@@ -517,7 +515,6 @@ public class PacketParserService extends Service {
 
                     case 5:
                         //获取睡眠设定
-                        //mSleepSetting.clear();
                         header = Arrays.copyOfRange(data,0,2);
                         for(int i=4;i<length;i+=4){
                             mSleepSetting.add(SleepSettingFromByte(header, Arrays.copyOfRange(data, i, i + 4)));
@@ -533,6 +530,7 @@ public class PacketParserService extends Service {
                         //同步结束
                         break;
                     case 9:
+                        //获取当日运动数据
                         mDailyData.Steps = data[0] & 0xFF;
                         mDailyData.Steps = (mDailyData.Steps << 8) | (data[1] & 0xFF);
                         mDailyData.Steps = (mDailyData.Steps << 8) | (data[2] & 0xFF);
