@@ -267,7 +267,7 @@ public class PacketParserService extends Service {
         packetValue.setCommandId((byte) (0x02));
         packetValue.setKey((byte) (0x21));
         long aData=0;
-        aData = aData<<8  | (longSit.Enable&0xFF);
+        aData = aData<<8  | (longSit.Enable & 0xFF);
         aData = aData<<16 | (longSit.Threshold & 0xFFFF);
         aData = aData<<8  | (longSit.DurationTime & 0xFF);
         aData = aData<<8  | (longSit.StartTime & 0xFF);
@@ -449,7 +449,7 @@ public class PacketParserService extends Service {
                 int lastLength = data.length;
                 byte[] sendData;
                 int sendIndex = 0;
-                while(lastLength>0) {
+                while(lastLength > 0) {
                     if (lastLength <= packLength) {
                         sendData = Arrays.copyOfRange(data, sendIndex, sendIndex + lastLength);
                         sendIndex += lastLength;
