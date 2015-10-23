@@ -186,7 +186,7 @@ public class PacketParserService extends Service {
         aData >>>= 5;
         alarm.Month = (int)(aData &0x0F);
         aData >>>= 4;
-        alarm.Year = (int)(aData &0x3F);
+        alarm.Year = (int)(aData &0x3F) + 2000;
         return alarm;
     }
     public void setAlarmList(List<Alarm> alarmList){
@@ -349,7 +349,7 @@ public class PacketParserService extends Service {
         aData >>>= 5;
         sportData.Month = (int)(aData &0x0F);
         aData >>>= 4;
-        sportData.Year = (int)(aData &0x3F);
+        sportData.Year = (int)(aData &0x3F) + 2000;
 
         aData = data[0] & 0xFFL;
         aData = (aData << 8) | (data[1] & 0xFFL);
@@ -387,7 +387,7 @@ public class PacketParserService extends Service {
         aData >>>= 5;
         sleepData.Month = (int)(aData &0x0F);
         aData >>>= 4;
-        sleepData.Year = (int)(aData &0x3F);
+        sleepData.Year = (int)(aData &0x3F) + 2000;
 
         aData = data[0] & 0xFFL;
         aData = (aData << 8) | (data[1] & 0xFFL);
@@ -413,7 +413,7 @@ public class PacketParserService extends Service {
         aData >>>= 5;
         sleepData.Month = (int)(aData &0x0F);
         aData >>>= 4;
-        sleepData.Year = (int)(aData &0x3F);
+        sleepData.Year = (int)(aData &0x3F) + 2000;
 
         aData = data[0] & 0xFFL;
         aData = (aData << 8) | (data[1] & 0xFFL);
