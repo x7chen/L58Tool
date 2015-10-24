@@ -208,7 +208,7 @@ public class BluetoothLeService extends Service {
     public void onCreate() {
         super.onCreate();
         Log.i(TAG, "BluetoothLeService onCreate");
-        registerReceiver(MyReceiver,MyIntentFilter());
+        registerReceiver(MyReceiver, MyIntentFilter());
     }
 
     private void broadcastUpdate(final String action) {
@@ -254,7 +254,7 @@ public class BluetoothLeService extends Service {
         // After using a given device, you should make sure that BluetoothGatt.close() is called
         // such that resources are cleaned up properly.  In this particular example, close() is
         // invoked when the UI is disconnected from the Service.
-        Log.i(TAG,"BluetoothLeService onUnbind");
+        Log.i(TAG, "BluetoothLeService onUnbind");
         //close();
         return super.onUnbind(intent);
     }
@@ -418,6 +418,10 @@ public class BluetoothLeService extends Service {
             Log.w(TAG, "BluetoothAdapter not initialized");
             return;
         }
+        if(characteristic == null) {
+            Log.i(TAG, "setCharacteristicNotification: characteristic is not exist!");
+            return;
+        }
         mBluetoothGatt.setCharacteristicNotification(characteristic, enabled);
 
         List<BluetoothGattDescriptor> descriptors=characteristic.getDescriptors();
@@ -451,6 +455,7 @@ public class BluetoothLeService extends Service {
             String action = intent.getAction();
             HandleCommand cmd = HandleCommand.getHandleCommand(intent.getIntExtra(HandleCMD, 0));
             BluetoothGattCharacteristic characteristic;
+            BluetoothGattService service;
             if(BluetoothLeService.ACTION_GATT_HANDLE.equals(action)){
                 switch (cmd){
                     case NORDIC_BLE_CONNECT:
@@ -466,7 +471,16 @@ public class BluetoothLeService extends Service {
                     case NUS_WRITE_CHARACTERISTIC:
                         byte[] data = intent.getByteArrayExtra(HandleData);
                         Log.i(TAG, "nordic_ble_nus_write_characteristic");
-                        characteristic = mBluetoothGatt.getService(NUS_SERVICE_UUID).getCharacteristic(RX_CHAR_UUID);
+                        if (mBluetoothAdapter == null || mBluetoothGatt == null) {
+                            Log.w(TAG, "BluetoothAdapter not initialized");
+                            return;
+                        }
+                        service =mBluetoothGatt.getService(NUS_SERVICE_UUID);
+                        if (service == null){
+                            Log.i(TAG,"NUS service is not exist!");
+                            return;
+                        }
+                        characteristic = service.getCharacteristic(RX_CHAR_UUID);
                         writeCharacteristic(characteristic,data);
                         String strBuilder = new String();
                         if(data == null){
@@ -484,7 +498,20 @@ public class BluetoothLeService extends Service {
                         if(notification.equals(true)) {
                             Log.i(TAG, "nordic_ble_nus_tx_set_notification");
                         }
-                        characteristic = mBluetoothGatt.getService(NUS_SERVICE_UUID).getCharacteristic(TX_CHAR_UUID);
+                        if (mBluetoothAdapter == null || mBluetoothGatt == null) {
+                            Log.w(TAG, "BluetoothAdapter not initialized");
+                            return;
+                        }
+                        service =mBluetoothGatt.getService(NUS_SERVICE_UUID);
+                        if (service == null){
+                            Log.i(TAG,"NUS service is not exist!");
+                            return;
+                        }
+                        characteristic = service.getCharacteristic(TX_CHAR_UUID);
+                        if(characteristic == null) {
+                            Log.i(TAG,"NUS characteristic is not exist!");
+                            return;
+                        }
                         setCharacteristicNotification(characteristic, notification);
 //                        characteristic = mBluetoothGatt.getService(NUS_SERVICE_UUID).getCharacteristic(RX_CHAR_UUID);
 //                        setCharacteristicNotification(characteristic, notification);
