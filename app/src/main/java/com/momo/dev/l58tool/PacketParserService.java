@@ -483,50 +483,62 @@ public class PacketParserService extends Service {
     }
 
     public void mock() {
-        Calendar calendar = Calendar.getInstance();
-        int year = calendar.get(Calendar.YEAR);
-        int month = calendar.get(Calendar.MONTH);
-        int day = calendar.get(Calendar.DAY_OF_MONTH);
-        int hour = calendar.get(Calendar.HOUR_OF_DAY);
-        int minute = calendar.get(Calendar.MINUTE);
-        int second = calendar.get(Calendar.SECOND);
-        mSportData.clear();
-        mSleepData.clear();
-        Random random = new Random();
+        new Thread(){
+            @Override
+            public void run() {
+                super.run();
+                try {
+                    Thread.sleep(50L);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                Calendar calendar = Calendar.getInstance();
+                int year = calendar.get(Calendar.YEAR);
+                int month = calendar.get(Calendar.MONTH);
+                int day = calendar.get(Calendar.DAY_OF_MONTH);
+                int hour = calendar.get(Calendar.HOUR_OF_DAY);
+                int minute = calendar.get(Calendar.MINUTE);
+                int second = calendar.get(Calendar.SECOND);
+                mSportData.clear();
+                mSleepData.clear();
+                Random random = new Random();
 
-        for (int i = 0; i < 20; i++) {
-            SportData sportData = new SportData();
-            sportData.Year = year;
-            sportData.Month = month;
-            sportData.Day = day;
-            sportData.Hour = Math.abs(random.nextInt()) % 24;
-            sportData.Minute = (Math.abs(random.nextInt()) % 4) * 15;
-            sportData.Steps = Math.abs(random.nextInt()) % 1000;
-            sportData.Calory = Math.abs(random.nextInt()) % 1000;
-            sportData.Distance = Math.abs(random.nextInt()) % 1000;
-            mSportData.add(sportData);
-        }
-        for (int i = 0; i < 10; i++) {
-            SleepData sleepData = new SleepData();
-            sleepData.Year = year;
-            sleepData.Month = month;
-            sleepData.Day = day;
-            sleepData.Hour = Math.abs(random.nextInt()) % 24;
-            sleepData.Minute = Math.abs(random.nextInt()) % 60;
-            sleepData.Mode = Math.abs(random.nextInt()) % 2;
-            mSleepData.add(sleepData);
-        }
-        if(mPacketCallBack != null){
-            mPacketCallBack.onDataReceived(RECEIVED_SPORT_DATA);
-        }
-        DailyData dailyData = new DailyData();
-        dailyData.Steps = Math.abs(random.nextInt()) % 1000;
-        dailyData.Distance = Math.abs(random.nextInt()) % 1000;
-        dailyData.Calory = Math.abs(random.nextInt()) % 1000;
-        mDailyData = dailyData;
-        if(mPacketCallBack != null){
-            mPacketCallBack.onDataReceived(RECEIVED_DAILY_DATA);
-        }
+                for (int i = 0; i < 20; i++) {
+                    SportData sportData = new SportData();
+                    sportData.Year = year;
+                    sportData.Month = month;
+                    sportData.Day = day;
+                    sportData.Hour = Math.abs(random.nextInt()) % 24;
+                    sportData.Minute = (Math.abs(random.nextInt()) % 4) * 15;
+                    sportData.Steps = Math.abs(random.nextInt()) % 1000;
+                    sportData.Calory = Math.abs(random.nextInt()) % 1000;
+                    sportData.Distance = Math.abs(random.nextInt()) % 1000;
+                    mSportData.add(sportData);
+                }
+                for (int i = 0; i < 10; i++) {
+                    SleepData sleepData = new SleepData();
+                    sleepData.Year = year;
+                    sleepData.Month = month;
+                    sleepData.Day = day;
+                    sleepData.Hour = Math.abs(random.nextInt()) % 24;
+                    sleepData.Minute = Math.abs(random.nextInt()) % 60;
+                    sleepData.Mode = Math.abs(random.nextInt()) % 2;
+                    mSleepData.add(sleepData);
+                }
+                if(mPacketCallBack != null){
+                    mPacketCallBack.onDataReceived(RECEIVED_SPORT_DATA);
+                }
+                DailyData dailyData = new DailyData();
+                dailyData.Steps = Math.abs(random.nextInt()) % 1000;
+                dailyData.Distance = Math.abs(random.nextInt()) % 1000;
+                dailyData.Calory = Math.abs(random.nextInt()) % 1000;
+                mDailyData = dailyData;
+                if(mPacketCallBack != null){
+                    mPacketCallBack.onDataReceived(RECEIVED_DAILY_DATA);
+                }
+            }
+        }.start();
+
     }
 
     private void send(Packet packet) {
