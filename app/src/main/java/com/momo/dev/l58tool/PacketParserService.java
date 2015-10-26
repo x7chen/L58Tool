@@ -2,16 +2,13 @@ package com.momo.dev.l58tool;
 
 import android.app.Service;
 import android.content.BroadcastReceiver;
-import android.content.ComponentCallbacks;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Binder;
-import android.os.Build;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.util.Log;
-import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -43,9 +40,9 @@ public class PacketParserService extends Service {
     private DailyData mDailyData = new DailyData();
     private LocalBinder mBinder = new LocalBinder();
 
-    public static byte ReceivedAlarm = 1;
-    public static byte ReceivedSportData = 2;
-    public static byte ReceivedDailyData = 3;
+    public static byte RECEIVED_ALARM = 1;
+    public static byte RECEIVED_SPORT_DATA = 2;
+    public static byte RECEIVED_DAILY_DATA = 3;
 
     private Packet send_packet = new Packet();
     private Packet receive_packet = new Packet();
@@ -576,7 +573,7 @@ public class PacketParserService extends Service {
                             mAlarms.add(AlarmFromByte(Arrays.copyOfRange(data, i, i + 5)));
                         }
                         if (mPacketCallBack != null) {
-                            mPacketCallBack.onDataReceived(ReceivedAlarm);
+                            mPacketCallBack.onDataReceived(RECEIVED_ALARM);
                         }
                         mAlarms.clear();
                         break;
@@ -620,7 +617,7 @@ public class PacketParserService extends Service {
                     case 8:
                         //同步结束
                         if (mPacketCallBack != null) {
-                            mPacketCallBack.onDataReceived(ReceivedSportData);
+                            mPacketCallBack.onDataReceived(RECEIVED_SPORT_DATA);
                         }
                         break;
                     case 9:
@@ -638,7 +635,7 @@ public class PacketParserService extends Service {
                         mDailyData.Calory = (mDailyData.Calory << 8) | (data[10] & 0xFF);
                         mDailyData.Calory = (mDailyData.Calory << 8) | (data[11] & 0xFF);
                         if (mPacketCallBack != null) {
-                            mPacketCallBack.onDataReceived(ReceivedDailyData);
+                            mPacketCallBack.onDataReceived(RECEIVED_DAILY_DATA);
                         }
                         break;
                     default:
