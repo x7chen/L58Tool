@@ -57,6 +57,7 @@ public class TestFragment extends Fragment {
     public TestFragment() {
         // Required empty public constructor
     }
+
     @Override
     public void onResume() {
         super.onResume();
@@ -70,47 +71,53 @@ public class TestFragment extends Fragment {
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
         mtestItemAdapter = new TestItemAdapter(getActivity());
-        mtestItemAdapter.addItem(new TestItem("设置时间",""));
+        mtestItemAdapter.addItem(new TestItem("设置时间", ""));
         mtestItemAdapter.addItem(new TestItem("获取运动数据", ""));
-        mtestItemAdapter.addItem(new TestItem("设置闹钟",""));
-        mtestItemAdapter.addItem(new TestItem("获取闹钟",""));
-        mtestItemAdapter.addItem(new TestItem("设置目标",""));
-        mtestItemAdapter.addItem(new TestItem("设置用户信息",""));
-        mtestItemAdapter.addItem(new TestItem("设置防丢",""));
-        mtestItemAdapter.addItem(new TestItem("设置久坐",""));
-        mtestItemAdapter.addItem(new TestItem("获取当日数据",""));
+        mtestItemAdapter.addItem(new TestItem("设置闹钟", ""));
+        mtestItemAdapter.addItem(new TestItem("获取闹钟", ""));
+        mtestItemAdapter.addItem(new TestItem("设置目标", ""));
+        mtestItemAdapter.addItem(new TestItem("设置用户信息", ""));
+        mtestItemAdapter.addItem(new TestItem("设置防丢", ""));
+        mtestItemAdapter.addItem(new TestItem("设置久坐", ""));
+        mtestItemAdapter.addItem(new TestItem("获取当日数据", ""));
 
     }
+
     PacketParserService.CallBack callBack = new PacketParserService.CallBack() {
         @Override
         public void onSendSuccess() {
-            Log.i(BluetoothLeService.TAG,"Command Send Success!");
+            Log.i(BluetoothLeService.TAG, "Command Send Success!");
+        }
+
+        @Override
+        public void onConnectStatusChanged(boolean status) {
+            Log.i(BluetoothLeService.TAG, "Connect Status Changed:" + status);
         }
     };
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View rootview = inflater.inflate(R.layout.fragment_test,container,false);
-        ListView listView = (ListView)rootview.findViewById(R.id.listView_TestItem);
+        View rootview = inflater.inflate(R.layout.fragment_test, container, false);
+        ListView listView = (ListView) rootview.findViewById(R.id.listView_TestItem);
         listView.setAdapter(mtestItemAdapter);
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
-                if(packetParserService == null){
-                    packetParserService = ((MainActivity)getActivity()).getPacketParserService();
-                    if(packetParserService == null) {
-                        Toast.makeText(getActivity(),"getPacketParserService is null.",Toast.LENGTH_SHORT).show();
+                if (packetParserService == null) {
+                    packetParserService = ((MainActivity) getActivity()).getPacketParserService();
+                    if (packetParserService == null) {
+                        Toast.makeText(getActivity(), "getPacketParserService is null.", Toast.LENGTH_SHORT).show();
                         return;
-                    }
-                    else {
-                        Toast.makeText(getActivity(),"getPacketParserService is ready.",Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(getActivity(), "getPacketParserService is ready.", Toast.LENGTH_SHORT).show();
                         packetParserService.registerCallback(callBack);
                     }
                 }
 
-                switch (position){
+                switch (position) {
                     case 0:
                         packetParserService.setTime();
                         packetParserService.mock();
@@ -120,7 +127,7 @@ public class TestFragment extends Fragment {
                         break;
                     case 2:
                         List<PacketParserService.Alarm> alarmList = new ArrayList<PacketParserService.Alarm>();
-                        for(int i=0;i<8;i++) {
+                        for (int i = 0; i < 8; i++) {
                             PacketParserService.Alarm alarm = new PacketParserService.Alarm();
                             alarm.Year = 2015;
                             alarm.Month = 11;
@@ -186,18 +193,20 @@ public class TestFragment extends Fragment {
         super.onDetach();
     }
 
-    private class TestItemAdapter extends BaseAdapter{
+    private class TestItemAdapter extends BaseAdapter {
         private ArrayList<TestItem> testItems;
         private LayoutInflater mInflator;
 
-        public TestItemAdapter(Context context){
+        public TestItemAdapter(Context context) {
             super();
             testItems = new ArrayList<TestItem>();
-            mInflator = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            mInflator = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         }
+
         public void addItem(TestItem testItem) {
             testItems.add(testItem);
         }
+
         @Override
         public Object getItem(int position) {
             return testItems.get(position);
@@ -216,15 +225,14 @@ public class TestFragment extends Fragment {
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
             ViewHolder viewHolder;
-            if(convertView == null){
+            if (convertView == null) {
                 convertView = mInflator.inflate(R.layout.listitem_test, null);
                 viewHolder = new ViewHolder();
                 viewHolder.item = (TextView) convertView.findViewById(R.id.test_item);
-                viewHolder.result = (TextView)convertView.findViewById(R.id.test_result);
+                viewHolder.result = (TextView) convertView.findViewById(R.id.test_result);
                 convertView.setTag(viewHolder);
-            }
-            else{
-                viewHolder = (ViewHolder)convertView.getTag();
+            } else {
+                viewHolder = (ViewHolder) convertView.getTag();
             }
             final TestItem testItem = testItems.get(position);
             viewHolder.item.setText(testItem.getTestItem());
@@ -233,19 +241,23 @@ public class TestFragment extends Fragment {
             return convertView;
         }
     }
+
     static class ViewHolder {
         TextView item;
         TextView result;
     }
-    private class TestItem{
+
+    private class TestItem {
         String testItem;
         String testResult;
-        public TestItem(String item,String result){
+
+        public TestItem(String item, String result) {
             super();
             this.testItem = item;
             this.testResult = result;
         }
-        public String getTestItem(){
+
+        public String getTestItem() {
             return this.testItem;
         }
 
@@ -253,7 +265,7 @@ public class TestFragment extends Fragment {
             this.testItem = testItem;
         }
 
-        public String getTestResult(){
+        public String getTestResult() {
             return this.testResult;
         }
 

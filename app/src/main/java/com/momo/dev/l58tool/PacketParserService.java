@@ -90,6 +90,7 @@ public class PacketParserService extends Service {
     }
     public interface CallBack{
         void onSendSuccess();
+        void onConnectStatusChanged(boolean status);
     }
     CallBack mPacketCallBack;
     public void registerCallback(CallBack callBack){
@@ -648,7 +649,9 @@ public class PacketParserService extends Service {
                 //发送成功
                 if (checkResult == 0x10) {
                     receive_packet.clear();
-                    mPacketCallBack.onSendSuccess();
+                    if (mPacketCallBack != null) {
+                        mPacketCallBack.onSendSuccess();
+                    }
                 }
                 //ACK错误，需要重发
                 if (checkResult == 0x30) {
@@ -690,10 +693,16 @@ public class PacketParserService extends Service {
                 sendBroadcast(GattCommand);
             } else if (BluetoothLeService.ACTION_GATT_CONNECTED.equals(action)) {
                 BLE_CONNECT_STATUS = true;
+                if (mPacketCallBack != null) {
+                    mPacketCallBack.onConnectStatusChanged(true);
+                }
                 receive_packet.clear();
                 send_packet.clear();
             } else if (BluetoothLeService.ACTION_GATT_DISCONNECTED.equals(action)) {
                 BLE_CONNECT_STATUS = false;
+                if (mPacketCallBack != null) {
+                    mPacketCallBack.onConnectStatusChanged(false);
+                }
                 receive_packet.clear();
                 send_packet.clear();
             } else if (BluetoothLeService.ACTION_GATT_IDLE.equals(action)) {
