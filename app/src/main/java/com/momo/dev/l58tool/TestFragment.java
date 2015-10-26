@@ -9,6 +9,7 @@ import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -80,7 +81,12 @@ public class TestFragment extends Fragment {
         mtestItemAdapter.addItem(new TestItem("获取当日数据",""));
 
     }
-
+    PacketParserService.CallBack callBack = new PacketParserService.CallBack() {
+        @Override
+        public void onSendSuccess() {
+            Log.i(BluetoothLeService.TAG,"Command Send Success!");
+        }
+    };
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -100,27 +106,31 @@ public class TestFragment extends Fragment {
                     }
                     else {
                         Toast.makeText(getActivity(),"getPacketParserService is ready.",Toast.LENGTH_SHORT).show();
+                        packetParserService.registerCallback(callBack);
                     }
                 }
 
                 switch (position){
                     case 0:
                         packetParserService.setTime();
+                        packetParserService.mock();
                         break;
                     case 1:
                         packetParserService.getSportData();
                         break;
                     case 2:
                         List<PacketParserService.Alarm> alarmList = new ArrayList<PacketParserService.Alarm>();
-                        PacketParserService.Alarm alarm = new PacketParserService.Alarm();
-                        alarm.Year = 2015;
-                        alarm.Month = 11;
-                        alarm.Day = 21;
-                        alarm.Hour = 15;
-                        alarm.Minute = 0;
-                        alarm.Repeat = 0x7F;
-                        alarm.ID = 0;
-                        alarmList.add(alarm);
+                        for(int i=0;i<8;i++) {
+                            PacketParserService.Alarm alarm = new PacketParserService.Alarm();
+                            alarm.Year = 2015;
+                            alarm.Month = 11;
+                            alarm.Day = 21;
+                            alarm.Hour = 15;
+                            alarm.Minute = 0;
+                            alarm.Repeat = 0x7F;
+                            alarm.ID = i;
+                            alarmList.add(alarm);
+                        }
                         packetParserService.setAlarmList(alarmList);
                         break;
                     case 3:

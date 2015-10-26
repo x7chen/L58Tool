@@ -2,6 +2,7 @@ package com.momo.dev.l58tool;
 
 import android.app.Service;
 import android.content.BroadcastReceiver;
+import android.content.ComponentCallbacks;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -16,6 +17,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Random;
 
 /**
  * Created by Administrator on 2015/10/16.
@@ -28,7 +30,7 @@ public class PacketParserService extends Service {
             "com.momo.dev.l58tool.packet.parser.ACTION_PACKET_HANDLE";
 
     public final static String HANDLE = "PacketHandle";
-    boolean BLE_CONNECT_STATUS;
+    boolean BLE_CONNECT_STATUS = false;
     private int GattStatus = 0;
     private int resent_cnt = 0;
     private Intent GattCommand = new Intent(BluetoothLeService.ACTION_GATT_HANDLE);
@@ -42,11 +44,13 @@ public class PacketParserService extends Service {
     private DailyData mDailyData = new DailyData();
 
     private LocalBinder mBinder = new LocalBinder();
+
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
         return mBinder;
     }
+
     public class LocalBinder extends Binder {
         public PacketParserService getService() {
             return PacketParserService.this;
@@ -57,41 +61,53 @@ public class PacketParserService extends Service {
     public void onCreate() {
         super.onCreate();
         registerReceiver(MyReceiver, MyIntentFilter());
-        final Intent intent = new Intent(this,BluetoothLeService.class);
+        final Intent intent = new Intent(this, BluetoothLeService.class);
         startService(intent);
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        final Intent intent = new Intent(this,BluetoothLeService.class);
+        final Intent intent = new Intent(this, BluetoothLeService.class);
         stopService(intent);
     }
 
-    public void connect(String address){
+    public void connect(String address) {
 
         BluetoothLeService.HandleCommand cmd = BluetoothLeService.HandleCommand.NORDIC_BLE_CONNECT;
         GattCommand.putExtra(BluetoothLeService.HandleCMD, cmd.getHandleCommandIndex(cmd.getCommand()));
         GattCommand.putExtra(BluetoothLeService.HandleDeviceAddress, address);
         sendBroadcast(GattCommand);
     }
-    public void disconnect(){
+
+    public void disconnect() {
         BluetoothLeService.HandleCommand cmd = BluetoothLeService.HandleCommand.NORDIC_BLE_DISCONNECT;
         GattCommand.putExtra(BluetoothLeService.HandleCMD, cmd.getHandleCommandIndex(cmd.getCommand()));
         sendBroadcast(GattCommand);
     }
-    private void sendACK(Packet rPacket,boolean error){
+    public boolean getConnnetStatus(){
+        return BLE_CONNECT_STATUS;
+    }
+    public interface CallBack{
+        void onSendSuccess();
+    }
+    CallBack mPacketCallBack;
+    public void registerCallback(CallBack callBack){
+        mPacketCallBack = callBack;
+    }
+    private void sendACK(Packet rPacket, boolean error) {
         Packet.L1Header l1Header = new Packet.L1Header();
-        l1Header.setLength((short)0);
+        l1Header.setLength((short) 0);
         l1Header.setACK(true);
         l1Header.setError(error);
         l1Header.setSequenceId(rPacket.getL1Header().getSequenceId());
-        l1Header.setCRC16((short)0);
+        l1Header.setCRC16((short) 0);
         send_packet.setL1Header(l1Header);
         send_packet.setPacketValue(null, false);
         send(send_packet);
     }
-    public int getVersion(){
+
+    public int getVersion() {
         return mVERSION;
     }
 
@@ -102,7 +118,7 @@ public class PacketParserService extends Service {
         return nSportData;
     }
 
-    public List<SleepData> getSleepDataList(){
+    public List<SleepData> getSleepDataList() {
         List<SleepData> nSleepData = new ArrayList<SleepData>();
         nSleepData.addAll(mSleepData);
         mSleepData.clear();
@@ -120,7 +136,7 @@ public class PacketParserService extends Service {
         return mAlarms;
     }
 
-    public void setTime(){
+    public void setTime() {
         Calendar calendar = Calendar.getInstance();
         int year = calendar.get(Calendar.YEAR);
         int month = calendar.get(Calendar.MONTH);
@@ -129,7 +145,7 @@ public class PacketParserService extends Service {
         int minute = calendar.get(Calendar.MINUTE);
         int second = calendar.get(Calendar.SECOND);
         int aData;
-        aData = (year-2000) & 0x3F;
+        aData = (year - 2000) & 0x3F;
         aData = aData << 4 | ((month + 1) & 0x0F);
         aData = aData << 5 | (day & 0x1F);
         aData = aData << 5 | (hour & 0x1F);
@@ -145,7 +161,8 @@ public class PacketParserService extends Service {
         send(send_packet);
         resent_cnt = 3;
     }
-    public static class Alarm{
+
+    public static class Alarm {
         public int ID;
         public int Year;
         public int Month;
@@ -154,9 +171,10 @@ public class PacketParserService extends Service {
         public int Minute;
         public int Repeat;
     }
-    private byte[] AlarmToByte(Alarm alarm){
+
+    private byte[] AlarmToByte(Alarm alarm) {
         long aData;
-        aData = (long)(alarm.Year - 2000) & 0x3F;
+        aData = (long) (alarm.Year - 2000) & 0x3F;
         aData = aData << 4 | (alarm.Month & 0x0F);
         aData = aData << 5 | (alarm.Day & 0x1F);
         aData = aData << 5 | (alarm.Hour & 0x1F);
@@ -166,7 +184,8 @@ public class PacketParserService extends Service {
         aData = aData << 7 | (alarm.Repeat & 0x7F);
         return Arrays.copyOfRange(Packet.longToByte(aData), 3, 8);
     }
-    private Alarm AlarmFromByte(byte[] data){
+
+    private Alarm AlarmFromByte(byte[] data) {
         Alarm alarm = new Alarm();
         long aData = data[0] & 0xFFL;
         aData = (aData << 8) | (data[1] & 0xFFL);
@@ -174,28 +193,29 @@ public class PacketParserService extends Service {
         aData = (aData << 8) | (data[3] & 0xFFL);
         aData = (aData << 8) | (data[4] & 0xFFL);
 
-        alarm.Repeat = (int)(aData & 0x7F);
+        alarm.Repeat = (int) (aData & 0x7F);
         aData >>>= 11;
-        alarm.ID = (int)(aData & 0x07);
+        alarm.ID = (int) (aData & 0x07);
         aData >>>= 3;
-        alarm.Minute = (int)(aData & 0x3F);
+        alarm.Minute = (int) (aData & 0x3F);
         aData >>>= 6;
-        alarm.Hour = (int)(aData & 0x1F);
+        alarm.Hour = (int) (aData & 0x1F);
         aData >>>= 5;
-        alarm.Day = (int)(aData & 0x1F);
+        alarm.Day = (int) (aData & 0x1F);
         aData >>>= 5;
-        alarm.Month = (int)(aData & 0x0F);
+        alarm.Month = (int) (aData & 0x0F);
         aData >>>= 4;
-        alarm.Year = (int)(aData & 0x3F) + 2000;
+        alarm.Year = (int) (aData & 0x3F) + 2000;
         return alarm;
     }
-    public void setAlarmList(List<Alarm> alarmList){
+
+    public void setAlarmList(List<Alarm> alarmList) {
 
         byte[] aData;
         Packet.PacketValue packetValue = new Packet.PacketValue();
         packetValue.setCommandId((byte) (0x02));
         packetValue.setKey((byte) (0x02));
-        for(Alarm alarm:alarmList){
+        for (Alarm alarm : alarmList) {
             aData = AlarmToByte(alarm);
             packetValue.appendValue(aData);
         }
@@ -204,57 +224,63 @@ public class PacketParserService extends Service {
         send(send_packet);
         resent_cnt = 3;
     }
-    public void getAlarms(){
+
+    public void getAlarms() {
         Packet.PacketValue packetValue = new Packet.PacketValue();
         packetValue.setCommandId((byte) (0x02));
         packetValue.setKey((byte) (0x03));
-        send_packet.setPacketValue(packetValue,true);
+        send_packet.setPacketValue(packetValue, true);
         send_packet.print();
         send(send_packet);
         resent_cnt = 3;
     }
-    public void setTarget(int target){
+
+    public void setTarget(int target) {
         Packet.PacketValue packetValue = new Packet.PacketValue();
         packetValue.setCommandId((byte) (0x02));
         packetValue.setKey((byte) (0x05));
         packetValue.setValue(Packet.intToByte(target));
-        send_packet.setPacketValue(packetValue,true);
+        send_packet.setPacketValue(packetValue, true);
         send_packet.print();
         send(send_packet);
         resent_cnt = 3;
     }
-    public static class UserProfile{
+
+    public static class UserProfile {
         public int Sex;
         public int Age;
         public int Stature;     //0.5cm
         public int Weight;      //0.5Kg
     }
-    public void setUserProfile(UserProfile userProfile){
+
+    public void setUserProfile(UserProfile userProfile) {
         Packet.PacketValue packetValue = new Packet.PacketValue();
         packetValue.setCommandId((byte) (0x02));
         packetValue.setKey((byte) (0x10));
         int aData;
         aData = userProfile.Sex;
-        aData = aData<<7 | (userProfile.Age & 0x7F);
-        aData = aData<<9 | (userProfile.Stature & 0x1FF);
-        aData = aData<<10 | (userProfile.Weight & 0x3FF);
+        aData = aData << 7 | (userProfile.Age & 0x7F);
+        aData = aData << 9 | (userProfile.Stature & 0x1FF);
+        aData = aData << 10 | (userProfile.Weight & 0x3FF);
         packetValue.setValue(Packet.intToByte(aData));
-        send_packet.setPacketValue(packetValue,true);
+        send_packet.setPacketValue(packetValue, true);
         send_packet.print();
         send(send_packet);
         resent_cnt = 3;
     }
-    public void setLossAlert(int lossAlert){
+
+    public void setLossAlert(int lossAlert) {
         Packet.PacketValue packetValue = new Packet.PacketValue();
         packetValue.setCommandId((byte) (0x02));
         packetValue.setKey((byte) (0x20));
-        packetValue.setValue(Packet.byteToByte((byte)lossAlert));
-        send_packet.setPacketValue(packetValue,true);
+        packetValue.setValue(Packet.byteToByte((byte) lossAlert));
+        send_packet.setPacketValue(packetValue, true);
         send_packet.print();
         send(send_packet);
         resent_cnt = 3;
     }
-    public static class LongSitSetting{
+
+    public static class LongSitSetting {
         public int Enable;
         public int Threshold;
         public int DurationTime;
@@ -262,24 +288,26 @@ public class PacketParserService extends Service {
         public int EndTime;
         public int Repeat;
     }
-    public void setLongSit(LongSitSetting longSit){
+
+    public void setLongSit(LongSitSetting longSit) {
         Packet.PacketValue packetValue = new Packet.PacketValue();
-        packetValue.setCommandId((byte)(0x02));
-        packetValue.setKey((byte)(0x21));
-        long aData=0;
-        aData = aData << 8  | (longSit.Enable & 0xFF);
+        packetValue.setCommandId((byte) (0x02));
+        packetValue.setKey((byte) (0x21));
+        long aData = 0;
+        aData = aData << 8 | (longSit.Enable & 0xFF);
         aData = aData << 16 | (longSit.Threshold & 0xFFFF);
-        aData = aData << 8  | (longSit.DurationTime & 0xFF);
-        aData = aData << 8  | (longSit.StartTime & 0xFF);
-        aData = aData << 8  | (longSit.EndTime & 0xFF);
-        aData = aData << 8  | (longSit.Repeat & 0xFF);
+        aData = aData << 8 | (longSit.DurationTime & 0xFF);
+        aData = aData << 8 | (longSit.StartTime & 0xFF);
+        aData = aData << 8 | (longSit.EndTime & 0xFF);
+        aData = aData << 8 | (longSit.Repeat & 0xFF);
         packetValue.setValue(Packet.longToByte(aData));
-        send_packet.setPacketValue(packetValue,true);
+        send_packet.setPacketValue(packetValue, true);
         send_packet.print();
         send(send_packet);
         resent_cnt = 3;
     }
-    public static class DailyData{
+
+    public static class DailyData {
         int Steps;
         int Distance;
         int Calory;
@@ -289,28 +317,28 @@ public class PacketParserService extends Service {
         return mDailyData;
     }
 
-    public void getDailyData(){
+    public void getDailyData() {
         Packet.PacketValue packetValue = new Packet.PacketValue();
         packetValue.setCommandId((byte) (0x05));
         packetValue.setKey((byte) (0x09));
-        send_packet.setPacketValue(packetValue,true);
+        send_packet.setPacketValue(packetValue, true);
         send_packet.print();
         send(send_packet);
         resent_cnt = 3;
     }
 
-    public void setSYNC(byte sync){
+    public void setSYNC(byte sync) {
         Packet.PacketValue packetValue = new Packet.PacketValue();
         packetValue.setCommandId((byte) (0x05));
         packetValue.setKey((byte) (0x06));
         packetValue.setValue(Packet.byteToByte(sync));
-        send_packet.setPacketValue(packetValue,true);
+        send_packet.setPacketValue(packetValue, true);
         send_packet.print();
         send(send_packet);
         resent_cnt = 3;
     }
 
-    public static class SportData{
+    public static class SportData {
         public int Year;
         public int Month;
         public int Day;
@@ -322,7 +350,8 @@ public class PacketParserService extends Service {
         public int Distance;
         public int Calory;
     }
-    public static class SleepData{
+
+    public static class SleepData {
         public int Year;
         public int Month;
         public int Day;
@@ -330,7 +359,8 @@ public class PacketParserService extends Service {
         public int Minute;
         public int Mode;
     }
-    public static class SleepSetting{
+
+    public static class SleepSetting {
         public int Year;
         public int Month;
         public int Day;
@@ -338,18 +368,19 @@ public class PacketParserService extends Service {
         public int Minute;
         public int Mode;
     }
-    private SportData SportDataFromByte(byte[] header,byte[] data){
+
+    private SportData SportDataFromByte(byte[] header, byte[] data) {
         SportData sportData = new SportData();
 
         long aData = 0;
         aData = header[0] & 0xFFL;
-        aData = (aData << 8) |(header[1] & 0xFFL);
+        aData = (aData << 8) | (header[1] & 0xFFL);
 
-        sportData.Day = (int)(aData & 0x1F);
+        sportData.Day = (int) (aData & 0x1F);
         aData >>>= 5;
-        sportData.Month = (int)(aData & 0x0F);
+        sportData.Month = (int) (aData & 0x0F);
         aData >>>= 4;
-        sportData.Year = (int)(aData & 0x3F) + 2000;
+        sportData.Year = (int) (aData & 0x3F) + 2000;
 
         aData = data[0] & 0xFFL;
         aData = (aData << 8) | (data[1] & 0xFFL);
@@ -360,75 +391,78 @@ public class PacketParserService extends Service {
         aData = (aData << 8) | (data[6] & 0xFFL);
         aData = (aData << 8) | (data[7] & 0xFFL);
 
-        sportData.Distance = (int)(aData & 0xFFFF);
+        sportData.Distance = (int) (aData & 0xFFFF);
         aData >>>= 16;
-        sportData.Calory = (int)(aData & 0x7FFFF);
+        sportData.Calory = (int) (aData & 0x7FFFF);
         aData >>>= 19;
-        sportData.ActiveTime = (int)(aData & 0x0F);
+        sportData.ActiveTime = (int) (aData & 0x0F);
         aData >>>= 4;
-        sportData.Steps = (int)(aData & 0xFFF);
+        sportData.Steps = (int) (aData & 0xFFF);
         aData >>>= 12;
-        sportData.Mode = (int)(aData & 0x03);
+        sportData.Mode = (int) (aData & 0x03);
         aData >>>= 2;
-        int time = (int)(aData & 0x7FF);
+        int time = (int) (aData & 0x7FF);
         sportData.Hour = time / 4;
         sportData.Minute = (time % 4) * 15;
 
         return sportData;
     }
-    private SleepData SleepDataFromByte(byte[] header,byte[] data){
+
+    private SleepData SleepDataFromByte(byte[] header, byte[] data) {
         SleepData sleepData = new SleepData();
 
         long aData = 0;
         aData = header[0] & 0xFFL;
-        aData = (aData << 8) |(header[1] & 0xFFL);
+        aData = (aData << 8) | (header[1] & 0xFFL);
 
-        sleepData.Day = (int)(aData & 0x1F);
+        sleepData.Day = (int) (aData & 0x1F);
         aData >>>= 5;
-        sleepData.Month = (int)(aData & 0x0F);
+        sleepData.Month = (int) (aData & 0x0F);
         aData >>>= 4;
-        sleepData.Year = (int)(aData & 0x3F) + 2000;
+        sleepData.Year = (int) (aData & 0x3F) + 2000;
 
         aData = data[0] & 0xFFL;
         aData = (aData << 8) | (data[1] & 0xFFL);
         aData = (aData << 8) | (data[2] & 0xFFL);
         aData = (aData << 8) | (data[3] & 0xFFL);
 
-        sleepData.Mode = (int)(aData & 0x0F);
+        sleepData.Mode = (int) (aData & 0x0F);
         aData >>>= 16;
-        int time = (int)(aData & 0xFFFF);
+        int time = (int) (aData & 0xFFFF);
         sleepData.Hour = time / 60;
         sleepData.Minute = time % 60;
 
         return sleepData;
     }
-    private SleepSetting SleepSettingFromByte(byte[] header,byte[] data){
+
+    private SleepSetting SleepSettingFromByte(byte[] header, byte[] data) {
         SleepSetting sleepData = new SleepSetting();
 
         long aData = 0;
         aData = header[0] & 0xFFL;
-        aData = (aData << 8) |(header[1] & 0xFFL);
+        aData = (aData << 8) | (header[1] & 0xFFL);
 
-        sleepData.Day = (int)(aData & 0x1F);
+        sleepData.Day = (int) (aData & 0x1F);
         aData >>>= 5;
-        sleepData.Month = (int)(aData & 0x0F);
+        sleepData.Month = (int) (aData & 0x0F);
         aData >>>= 4;
-        sleepData.Year = (int)(aData & 0x3F) + 2000;
+        sleepData.Year = (int) (aData & 0x3F) + 2000;
 
         aData = data[0] & 0xFFL;
         aData = (aData << 8) | (data[1] & 0xFFL);
         aData = (aData << 8) | (data[2] & 0xFFL);
         aData = (aData << 8) | (data[3] & 0xFFL);
 
-        sleepData.Mode = (int)(aData & 0x0F);
+        sleepData.Mode = (int) (aData & 0x0F);
         aData >>>= 16;
-        int time = (int)(aData & 0xFFFF);
+        int time = (int) (aData & 0xFFFF);
         sleepData.Hour = time / 60;
         sleepData.Minute = time % 60;
 
         return sleepData;
     }
-    public void getSportData(){
+
+    public void getSportData() {
 
         Packet.PacketValue packetValue = new Packet.PacketValue();
         packetValue.setCommandId((byte) (0x05));
@@ -439,17 +473,60 @@ public class PacketParserService extends Service {
         send(send_packet);
         resent_cnt = 3;
     }
-    private void send(Packet packet){
+
+    public void mock() {
+        Calendar calendar = Calendar.getInstance();
+        int year = calendar.get(Calendar.YEAR);
+        int month = calendar.get(Calendar.MONTH);
+        int day = calendar.get(Calendar.DAY_OF_MONTH);
+        int hour = calendar.get(Calendar.HOUR_OF_DAY);
+        int minute = calendar.get(Calendar.MINUTE);
+        int second = calendar.get(Calendar.SECOND);
+        mSportData.clear();
+        mSleepData.clear();
+        Random random = new Random();
+
+        for (int i = 0; i < 20; i++) {
+            SportData sportData = new SportData();
+            sportData.Year = year;
+            sportData.Month = month;
+            sportData.Day = day;
+            sportData.Hour = Math.abs(random.nextInt()) % 24;
+            sportData.Minute = (Math.abs(random.nextInt()) % 4) * 15;
+            sportData.Steps = Math.abs(random.nextInt()) % 1000;
+            sportData.Calory = Math.abs(random.nextInt()) % 1000;
+            sportData.Distance = Math.abs(random.nextInt()) % 1000;
+            mSportData.add(sportData);
+        }
+
+        for (int i = 0; i < 10; i++) {
+            SleepData sleepData = new SleepData();
+            sleepData.Year = year;
+            sleepData.Month = month;
+            sleepData.Day = day;
+            sleepData.Hour = Math.abs(random.nextInt()) % 24;
+            sleepData.Minute = Math.abs(random.nextInt()) % 60;
+            sleepData.Mode = Math.abs(random.nextInt()) % 2;
+            mSleepData.add(sleepData);
+        }
+        DailyData dailyData = new DailyData();
+        dailyData.Steps = Math.abs(random.nextInt()) % 1000;
+        dailyData.Distance = Math.abs(random.nextInt()) % 1000;
+        dailyData.Calory = Math.abs(random.nextInt()) % 1000;
+        mDailyData = dailyData;
+    }
+
+    private void send(Packet packet) {
 
         final byte[] data = packet.getPacket();
-        new Thread(new Runnable(){
+        new Thread(new Runnable() {
             @Override
             public void run() {
                 final int packLength = 20;
                 int lastLength = data.length;
                 byte[] sendData;
                 int sendIndex = 0;
-                while(lastLength > 0) {
+                while (lastLength > 0) {
                     if (lastLength <= packLength) {
                         sendData = Arrays.copyOfRange(data, sendIndex, sendIndex + lastLength);
                         sendIndex += lastLength;
@@ -464,27 +541,27 @@ public class PacketParserService extends Service {
                     GattCommand.putExtra(BluetoothLeService.HandleData, sendData);
                     try {
                         Thread.sleep(50L);
-                    }catch (InterruptedException e){
+                    } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
                     sendBroadcast(GattCommand);
                     GattStatus = 1;
                 }
             }
-        },"Tread-BLESend").start();
+        }, "Tread-BLESend").start();
     }
 
-    private void resolve(Packet.PacketValue packetValue){
+    private void resolve(Packet.PacketValue packetValue) {
         byte command = packetValue.getCommandId();
         byte key = packetValue.getKey();
         int length = packetValue.getValueLength();
-        byte[] data= packetValue.getValue();
-        switch (command){
+        byte[] data = packetValue.getValue();
+        switch (command) {
             case 2:
-                switch (key){
+                switch (key) {
                     case 4:
                         //获取闹钟
-                        for(int i=0;i<length;i+=5) {
+                        for (int i = 0; i < length; i += 5) {
                             mAlarms.add(AlarmFromByte(Arrays.copyOfRange(data, i, i + 5)));
                         }
                         mAlarms.clear();
@@ -495,35 +572,35 @@ public class PacketParserService extends Service {
                 break;
             case 5:
                 byte[] header;
-                switch (key){
+                switch (key) {
                     case 2:
                         //获取运动数据
                         mSportData.clear();
-                        header = Arrays.copyOfRange(data,0,2);
-                        for(int i=4;i<length;i+=8){
-                            mSportData.add(SportDataFromByte(header,Arrays.copyOfRange(data,i,i+8)));
+                        header = Arrays.copyOfRange(data, 0, 2);
+                        for (int i = 4; i < length; i += 8) {
+                            mSportData.add(SportDataFromByte(header, Arrays.copyOfRange(data, i, i + 8)));
                         }
                         break;
 
                     case 3:
                         //获取睡眠数据
-                        header = Arrays.copyOfRange(data,0,2);
-                        for (int i = 4; i < length; i +=4){
-                            mSleepData.add(SleepDataFromByte(header,Arrays.copyOfRange(data,i,i+4)));
+                        header = Arrays.copyOfRange(data, 0, 2);
+                        for (int i = 4; i < length; i += 4) {
+                            mSleepData.add(SleepDataFromByte(header, Arrays.copyOfRange(data, i, i + 4)));
                         }
                         break;
 
                     case 5:
                         //获取睡眠设定
-                        header = Arrays.copyOfRange(data,0,2);
-                        for(int i=4;i<length;i+=4){
+                        header = Arrays.copyOfRange(data, 0, 2);
+                        for (int i = 4; i < length; i += 4) {
                             mSleepSetting.add(SleepSettingFromByte(header, Arrays.copyOfRange(data, i, i + 4)));
                         }
                         break;
 
                     case 7:
                         //开始同步
-                        Log.i(BluetoothLeService.TAG,"sportData get");
+                        Log.i(BluetoothLeService.TAG, "sportData get");
                         break;
 
                     case 8:
@@ -545,92 +622,88 @@ public class PacketParserService extends Service {
                         mDailyData.Calory = (mDailyData.Calory << 8) | (data[11] & 0xFF);
                         break;
                     default:
-                        Log.i(BluetoothLeService.TAG,"sportData get");
+                        Log.i(BluetoothLeService.TAG, "sportData get");
                         break;
                 }
                 break;
         }
     }
+
     private BroadcastReceiver MyReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
-            if(BluetoothLeService.ACTION_GATT_HANDLE.equals(action)) {
+            if (BluetoothLeService.ACTION_GATT_HANDLE.equals(action)) {
 
-            }
-            else if(BluetoothLeService.ACTION_DATA_AVAILABLE.equals(action)){
-                byte[] data=intent.getByteArrayExtra(BluetoothLeService.HandleData);
+            } else if (BluetoothLeService.ACTION_DATA_AVAILABLE.equals(action)) {
+                byte[] data = intent.getByteArrayExtra(BluetoothLeService.HandleData);
                 receive_packet.append(data);
                 int checkResult = receive_packet.checkPacket();
                 Log.i(BluetoothLeService.TAG, "Check:" + Integer.toHexString(checkResult));
                 receive_packet.print();
                 //数据头错误，清空
-                if (checkResult == 0x05){
+                if (checkResult == 0x05) {
                     receive_packet.clear();
                 }
                 //发送成功
-                if(checkResult==0x10){
+                if (checkResult == 0x10) {
                     receive_packet.clear();
+                    mPacketCallBack.onSendSuccess();
                 }
                 //ACK错误，需要重发
-                if (checkResult == 0x30){
-                    if(0<resent_cnt--) {
-                        Log.i(BluetoothLeService.TAG,"Resent Packet!");
+                if (checkResult == 0x30) {
+                    if (0 < resent_cnt--) {
+                        Log.i(BluetoothLeService.TAG, "Resent Packet!");
                         send(send_packet);
                     }
                     receive_packet.clear();
                 }
                 //接收数据包校验正确
-                if(checkResult == 0){
+                if (checkResult == 0) {
                     try {
-                        Packet.PacketValue packetValue = (Packet.PacketValue)receive_packet.getPacketValue().clone();
+                        Packet.PacketValue packetValue = (Packet.PacketValue) receive_packet.getPacketValue().clone();
                         resolve(packetValue);
+                    } catch (CloneNotSupportedException e) {
+                        Log.i(BluetoothLeService.TAG, "Packet.PacketValue:CloneNotSupportedException");
                     }
-                    catch (CloneNotSupportedException e){
-                        Log.i(BluetoothLeService.TAG,"Packet.PacketValue:CloneNotSupportedException");
-                    }
-                    Log.i(BluetoothLeService.TAG,"Send ACK!");
+                    Log.i(BluetoothLeService.TAG, "Send ACK!");
                     sendACK(receive_packet, false);
                     receive_packet.clear();
                 }
                 //接收数据包校验错误
-                if (checkResult == 0x0b){
-                    sendACK(receive_packet,true);
+                if (checkResult == 0x0b) {
+                    sendACK(receive_packet, true);
                     receive_packet.clear();
                 }
 
-            }
-            else if(PacketParserService.ACTION_PACKET_HANDLE.equals(action)){
-                int handle = intent.getIntExtra(HANDLE,0);
-                switch (handle){
+            } else if (PacketParserService.ACTION_PACKET_HANDLE.equals(action)) {
+                int handle = intent.getIntExtra(HANDLE, 0);
+                switch (handle) {
                     case 0:
                     default:
                         break;
                 }
-            }
-            else if(BluetoothLeService.ACTION_GATT_SERVICES_DISCOVERED.equals(action)){
+            } else if (BluetoothLeService.ACTION_GATT_SERVICES_DISCOVERED.equals(action)) {
                 BluetoothLeService.HandleCommand cmd = BluetoothLeService.HandleCommand.NUS_TX_SET_NOTIFICATION;
                 GattCommand.putExtra(BluetoothLeService.HandleCMD, cmd.getIndex());
                 GattCommand.putExtra(BluetoothLeService.HandleData, true);
                 sendBroadcast(GattCommand);
-            }
-            else if(BluetoothLeService.ACTION_GATT_CONNECTED.equals(action)){
+            } else if (BluetoothLeService.ACTION_GATT_CONNECTED.equals(action)) {
                 BLE_CONNECT_STATUS = true;
                 receive_packet.clear();
                 send_packet.clear();
-            }
-            else if (BluetoothLeService.ACTION_GATT_DISCONNECTED.equals(action)){
+            } else if (BluetoothLeService.ACTION_GATT_DISCONNECTED.equals(action)) {
                 BLE_CONNECT_STATUS = false;
                 receive_packet.clear();
                 send_packet.clear();
-            }
-            else if (BluetoothLeService.ACTION_GATT_IDLE.equals(action)){
+            } else if (BluetoothLeService.ACTION_GATT_IDLE.equals(action)) {
                 GattStatus = 0;
-                Log.i(BluetoothLeService.TAG,"send complete");
+                Log.i(BluetoothLeService.TAG, "send complete");
             }
 
         }
     };
+
     private static IntentFilter MyIntentFilter() {
         final IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(BluetoothLeService.ACTION_GATT_CONNECTED);
