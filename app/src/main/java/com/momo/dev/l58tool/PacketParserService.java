@@ -575,7 +575,9 @@ public class PacketParserService extends Service {
                         for (int i = 0; i < length; i += 5) {
                             mAlarms.add(AlarmFromByte(Arrays.copyOfRange(data, i, i + 5)));
                         }
-                        mPacketCallBack.onDataReceived(ReceivedAlarm);
+                        if (mPacketCallBack != null) {
+                            mPacketCallBack.onDataReceived(ReceivedAlarm);
+                        }
                         mAlarms.clear();
                         break;
                     default:
@@ -617,7 +619,9 @@ public class PacketParserService extends Service {
 
                     case 8:
                         //同步结束
-                        mPacketCallBack.onDataReceived(ReceivedSportData);
+                        if (mPacketCallBack != null) {
+                            mPacketCallBack.onDataReceived(ReceivedSportData);
+                        }
                         break;
                     case 9:
                         //获取当日运动数据
@@ -633,7 +637,9 @@ public class PacketParserService extends Service {
                         mDailyData.Calory = (mDailyData.Calory << 8) | (data[9] & 0xFF);
                         mDailyData.Calory = (mDailyData.Calory << 8) | (data[10] & 0xFF);
                         mDailyData.Calory = (mDailyData.Calory << 8) | (data[11] & 0xFF);
-                        mPacketCallBack.onDataReceived(ReceivedDailyData);
+                        if (mPacketCallBack != null) {
+                            mPacketCallBack.onDataReceived(ReceivedDailyData);
+                        }
                         break;
                     default:
                         Log.i(BluetoothLeService.TAG, "sportData get");
