@@ -93,6 +93,11 @@ public class TestFragment extends Fragment {
         public void onConnectStatusChanged(boolean status) {
             Log.i(BluetoothLeService.TAG, "Connect Status Changed:" + status);
         }
+
+        @Override
+        public void onDataReceived(byte category) {
+
+        }
     };
 
     @Override
@@ -172,7 +177,7 @@ public class TestFragment extends Fragment {
                         packetParserService.getDailyData();
                         break;
                     case 9:
-//                        packetParserService
+//                        packetParserService.
                         break;
                     default:
 //                        PacketHandle.putExtra(PacketParserService.HANDLE,position+1);
