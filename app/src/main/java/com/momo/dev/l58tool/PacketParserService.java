@@ -35,15 +35,16 @@ public class PacketParserService extends Service {
     private int resent_cnt = 0;
     private Intent GattCommand = new Intent(BluetoothLeService.ACTION_GATT_HANDLE);
 
-    private Packet send_packet = new Packet();
-    private Packet receive_packet = new Packet();
+    private CallBack mPacketCallBack;
     private List<Alarm> mAlarms = new ArrayList<Alarm>();
     private List<SportData> mSportData = new ArrayList<SportData>();
     private List<SleepData> mSleepData = new ArrayList<SleepData>();
     private List<SleepSetting> mSleepSetting = new ArrayList<SleepSetting>();
     private DailyData mDailyData = new DailyData();
-
     private LocalBinder mBinder = new LocalBinder();
+
+    private Packet send_packet = new Packet();
+    private Packet receive_packet = new Packet();
 
     @Nullable
     @Override
@@ -85,17 +86,21 @@ public class PacketParserService extends Service {
         GattCommand.putExtra(BluetoothLeService.HandleCMD, cmd.getHandleCommandIndex(cmd.getCommand()));
         sendBroadcast(GattCommand);
     }
-    public boolean getConnnetStatus(){
+
+    public boolean getConnnetStatus() {
         return BLE_CONNECT_STATUS;
     }
-    public interface CallBack{
+
+    public interface CallBack {
         void onSendSuccess();
+
         void onConnectStatusChanged(boolean status);
     }
-    CallBack mPacketCallBack;
-    public void registerCallback(CallBack callBack){
+
+    public void registerCallback(CallBack callBack) {
         mPacketCallBack = callBack;
     }
+
     private void sendACK(Packet rPacket, boolean error) {
         Packet.L1Header l1Header = new Packet.L1Header();
         l1Header.setLength((short) 0);

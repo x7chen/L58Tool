@@ -139,6 +139,7 @@ public class TestFragment extends Fragment {
                             alarmList.add(alarm);
                         }
                         packetParserService.setAlarmList(alarmList);
+                        packetParserService.mock();
                         break;
                     case 3:
                         packetParserService.getAlarms();
