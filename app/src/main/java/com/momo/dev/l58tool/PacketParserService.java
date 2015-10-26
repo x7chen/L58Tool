@@ -506,7 +506,6 @@ public class PacketParserService extends Service {
             sportData.Distance = Math.abs(random.nextInt()) % 1000;
             mSportData.add(sportData);
         }
-
         for (int i = 0; i < 10; i++) {
             SleepData sleepData = new SleepData();
             sleepData.Year = year;
@@ -517,11 +516,17 @@ public class PacketParserService extends Service {
             sleepData.Mode = Math.abs(random.nextInt()) % 2;
             mSleepData.add(sleepData);
         }
+        if(mPacketCallBack != null){
+            mPacketCallBack.onDataReceived(RECEIVED_SPORT_DATA);
+        }
         DailyData dailyData = new DailyData();
         dailyData.Steps = Math.abs(random.nextInt()) % 1000;
         dailyData.Distance = Math.abs(random.nextInt()) % 1000;
         dailyData.Calory = Math.abs(random.nextInt()) % 1000;
         mDailyData = dailyData;
+        if(mPacketCallBack != null){
+            mPacketCallBack.onDataReceived(RECEIVED_DAILY_DATA);
+        }
     }
 
     private void send(Packet packet) {
