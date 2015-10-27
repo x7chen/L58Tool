@@ -168,8 +168,8 @@ public class TestFragment extends Fragment {
                         longSitSetting.Enable = 1;
                         longSitSetting.Threshold = 100;
                         longSitSetting.DurationTime = 30;
-                        longSitSetting.StartTime = 60;
-                        longSitSetting.EndTime = 80;
+                        longSitSetting.StartTimeHour = 8;
+                        longSitSetting.EndTimeHour = 12;
                         longSitSetting.Repeat = 0x7F;
                         packetParserService.setLongSit(longSitSetting);
                         break;
