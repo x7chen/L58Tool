@@ -167,7 +167,7 @@ public class TestFragment extends Fragment {
                         PacketParserService.LongSitSetting longSitSetting = new PacketParserService.LongSitSetting();
                         longSitSetting.Enable = 1;
                         longSitSetting.Threshold = 100;
-                        longSitSetting.DurationTime = 30;
+                        longSitSetting.DurationTimeMinutes = 30;
                         longSitSetting.StartTimeHour = 8;
                         longSitSetting.EndTimeHour = 12;
                         longSitSetting.Repeat = 0x7F;
