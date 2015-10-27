@@ -292,8 +292,8 @@ public class PacketParserService extends Service {
         public int Enable;
         public int Threshold;
         public int DurationTime;
-        public int StartTime;
-        public int EndTime;
+        public int StartTimeHour;
+        public int EndTimeHour;
         public int Repeat;
     }
 
@@ -305,8 +305,8 @@ public class PacketParserService extends Service {
         aData = aData << 8 | (longSit.Enable & 0xFF);
         aData = aData << 16 | (longSit.Threshold & 0xFFFF);
         aData = aData << 8 | (longSit.DurationTime & 0xFF);
-        aData = aData << 8 | (longSit.StartTime & 0xFF);
-        aData = aData << 8 | (longSit.EndTime & 0xFF);
+        aData = aData << 8 | (longSit.StartTimeHour & 0xFF);
+        aData = aData << 8 | (longSit.EndTimeHour & 0xFF);
         aData = aData << 8 | (longSit.Repeat & 0xFF);
         packetValue.setValue(Packet.longToByte(aData));
         send_packet.setPacketValue(packetValue, true);
@@ -538,7 +538,6 @@ public class PacketParserService extends Service {
                 }
             }
         }.start();
-
     }
 
     private void send(Packet packet) {
