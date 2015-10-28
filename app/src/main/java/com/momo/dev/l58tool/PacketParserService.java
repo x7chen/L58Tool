@@ -94,9 +94,9 @@ public class PacketParserService extends Service {
 
     public interface CallBack {
         void onSendSuccess();
-
         void onConnectStatusChanged(boolean status);
         void onDataReceived(byte category);
+        void onCharacteristicNotFound();
     }
 
     public void registerCallback(CallBack callBack) {
@@ -737,11 +737,12 @@ public class PacketParserService extends Service {
                 }
                 receive_packet.clear();
                 send_packet.clear();
-            } else if (BluetoothLeService.ACTION_GATT_IDLE.equals(action)) {
-                GattStatus = 0;
-                Log.i(BluetoothLeService.TAG, "send complete");
             }
-
+            else if(BluetoothLeService.ACTION_GATT_CHARACTERISTIC_NOT_FOUND.equals(action)){
+                if (mPacketCallBack != null) {
+                    mPacketCallBack.onCharacteristicNotFound();
+                }
+            }
         }
     };
 
@@ -751,7 +752,8 @@ public class PacketParserService extends Service {
         intentFilter.addAction(BluetoothLeService.ACTION_GATT_DISCONNECTED);
         intentFilter.addAction(BluetoothLeService.ACTION_GATT_SERVICES_DISCOVERED);
         intentFilter.addAction(BluetoothLeService.ACTION_DATA_AVAILABLE);
-        intentFilter.addAction(BluetoothLeService.ACTION_GATT_IDLE);
+
+        intentFilter.addAction(BluetoothLeService.ACTION_GATT_CHARACTERISTIC_NOT_FOUND);
         intentFilter.addAction(PacketParserService.ACTION_PACKET_HANDLE);
 
 //        intentFilter.addAction(BluetoothLeService.ACTION_GATT_HANDLE);

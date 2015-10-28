@@ -98,6 +98,11 @@ public class TestFragment extends Fragment {
         public void onDataReceived(byte category) {
 
         }
+
+        @Override
+        public void onCharacteristicNotFound() {
+
+        }
     };
 
     @Override
