@@ -83,27 +83,62 @@ public class TestFragment extends Fragment {
 
     }
 
-    PacketParserService.CallBack callBack = new PacketParserService.CallBack() {
-        @Override
-        public void onSendSuccess() {
-            Log.i(BluetoothLeService.TAG, "Command Send Success!");
-        }
+    PacketParserService.CallBack callBack;
 
-        @Override
-        public void onConnectStatusChanged(boolean status) {
-            Log.i(BluetoothLeService.TAG, "Connect Status Changed:" + status);
-        }
+    {
+        callBack = new PacketParserService.CallBack() {
+            @Override
+            public void onSendSuccess() {
+                Log.i(BluetoothLeService.TAG, "Command Send Success!");
+            }
 
-        @Override
-        public void onDataReceived(byte category) {
+            @Override
+            public void onConnectStatusChanged(boolean status) {
+                Log.i(BluetoothLeService.TAG, "Connect Status Changed:" + status);
+            }
 
-        }
+            @Override
+            public void onDataReceived(byte category) {
+                switch (category) {
+                    case PacketParserService.RECEIVED_ALARM:
+                        List<PacketParserService.Alarm> alarmList;
+                        if(packetParserService != null) {
+                            alarmList = packetParserService.getAlarmsList();
+                            for (PacketParserService.Alarm alarm:alarmList){
 
-        @Override
-        public void onCharacteristicNotFound() {
+                            }
+                        }
+                        break;
+                    case PacketParserService.RECEIVED_DAILY_DATA:
+                        break;
+                    case PacketParserService.RECEIVED_SPORT_DATA:
+                        List<PacketParserService.SportData> sportDataList;
+                        if(packetParserService != null) {
+                            sportDataList = packetParserService.getSportDataList();
+                            for (PacketParserService.SportData sportData:sportDataList){
 
-        }
-    };
+                            }
+                        }
+                        List<PacketParserService.SleepData> sleepDataList;
+                        if(packetParserService != null) {
+                            sleepDataList = packetParserService.getSleepDataList();
+                            for (PacketParserService.SleepData sleepData:sleepDataList){
+
+                            }
+                        }
+                        break;
+                    default:
+                        break;
+                }
+
+            }
+
+            @Override
+            public void onCharacteristicNotFound() {
+                Log.i(BluetoothLeService.TAG, "onCharacteristicNotFound.");
+            }
+        };
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,

@@ -472,17 +472,18 @@ public class BluetoothLeService extends Service {
                         Log.i(TAG, "nordic_ble_nus_write_characteristic");
                         if (mBluetoothAdapter == null || mBluetoothGatt == null) {
                             Log.w(TAG, "BluetoothAdapter not initialized");
-                            return;
+                            break;
                         }
                         service = mBluetoothGatt.getService(NUS_SERVICE_UUID);
                         if (service == null) {
                             Log.i(TAG, "NUS service is not exist!");
-                            return;
+                            break;
                         }
                         characteristic = service.getCharacteristic(RX_CHAR_UUID);
-                        if (characteristic != null) {
+                        if (characteristic == null) {
                             intentAction = ACTION_GATT_CHARACTERISTIC_NOT_FOUND;
                             broadcastUpdate(intentAction);
+                            break;
                         }
                         writeCharacteristic(characteristic, data);
                         String strBuilder = new String();
@@ -503,19 +504,19 @@ public class BluetoothLeService extends Service {
                         }
                         if (mBluetoothAdapter == null || mBluetoothGatt == null) {
                             Log.w(TAG, "BluetoothAdapter not initialized");
-                            return;
+                            break;
                         }
                         service = mBluetoothGatt.getService(NUS_SERVICE_UUID);
                         if (service == null) {
                             Log.i(TAG, "NUS service is not exist!");
-                            return;
+                            break;
                         }
                         characteristic = service.getCharacteristic(TX_CHAR_UUID);
                         if (characteristic == null) {
                             Log.i(TAG, "NUS characteristic is not exist!");
                             intentAction = ACTION_GATT_CHARACTERISTIC_NOT_FOUND;
                             broadcastUpdate(intentAction);
-                            return;
+                            break;
                         }
                         setCharacteristicNotification(characteristic, notification);
 //                        characteristic = mBluetoothGatt.getService(NUS_SERVICE_UUID).getCharacteristic(RX_CHAR_UUID);

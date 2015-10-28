@@ -40,9 +40,9 @@ public class PacketParserService extends Service {
     private DailyData mDailyData = new DailyData();
     private LocalBinder mBinder = new LocalBinder();
 
-    public static byte RECEIVED_ALARM = 1;
-    public static byte RECEIVED_SPORT_DATA = 2;
-    public static byte RECEIVED_DAILY_DATA = 3;
+    public static final byte RECEIVED_ALARM = 1;
+    public static final byte RECEIVED_SPORT_DATA = 2;
+    public static final byte RECEIVED_DAILY_DATA = 3;
 
     private Packet send_packet = new Packet();
     private Packet receive_packet = new Packet();
