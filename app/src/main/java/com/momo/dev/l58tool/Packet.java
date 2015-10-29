@@ -166,7 +166,7 @@ public class Packet {
             strBuilder = strBuilder + Integer.toHexString(bb & 0xff).toUpperCase();
             strBuilder += " ";
         }
-        Log.i(BluetoothLeService.TAG, this.toString()+strBuilder);
+        Log.i(BluetoothLeService.TAG, this.toString()+":"+strBuilder);
     }
     public static void Print(List<Byte> data){
         String strBuilder = new String();

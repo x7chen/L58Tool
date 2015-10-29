@@ -679,14 +679,14 @@ public class PacketParserService extends Service {
                     receive_packet.clear();
                 }
                 //发送成功
-                if (checkResult == 0x10) {
+                else if (checkResult == 0x10) {
                     receive_packet.clear();
                     if (mPacketCallBack != null) {
                         mPacketCallBack.onSendSuccess();
                     }
                 }
                 //ACK错误，需要重发
-                if (checkResult == 0x30) {
+                else if (checkResult == 0x30) {
                     if (0 < resent_cnt--) {
                         Log.i(BluetoothLeService.TAG, "Resent Packet!");
                         send(send_packet);
@@ -694,7 +694,7 @@ public class PacketParserService extends Service {
                     receive_packet.clear();
                 }
                 //接收数据包校验正确
-                if (checkResult == 0) {
+                else if (checkResult == 0) {
                     try {
                         Packet.PacketValue packetValue = (Packet.PacketValue) receive_packet.getPacketValue().clone();
                         resolve(packetValue);
@@ -706,7 +706,7 @@ public class PacketParserService extends Service {
                     receive_packet.clear();
                 }
                 //接收数据包校验错误
-                if (checkResult == 0x0b) {
+                else if (checkResult == 0x0b) {
                     sendACK(receive_packet, true);
                     receive_packet.clear();
                 }
