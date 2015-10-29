@@ -328,18 +328,18 @@ public class PacketParserService extends Service {
     public void getDailyData() {
         Packet.PacketValue packetValue = new Packet.PacketValue();
         packetValue.setCommandId((byte) (0x05));
-        packetValue.setKey((byte) (0x09));
+        packetValue.setKey((byte) (0x0B));
         send_packet.setPacketValue(packetValue, true);
         send_packet.print();
         send(send_packet);
         resent_cnt = 3;
     }
 
-    public void setSYNC(byte sync) {
+    public void setSportNotify(byte notify) {
         Packet.PacketValue packetValue = new Packet.PacketValue();
         packetValue.setCommandId((byte) (0x05));
         packetValue.setKey((byte) (0x06));
-        packetValue.setValue(Packet.byteToByte(sync));
+        packetValue.setValue(Packet.byteToByte(notify));
         send_packet.setPacketValue(packetValue, true);
         send_packet.print();
         send(send_packet);
@@ -636,7 +636,7 @@ public class PacketParserService extends Service {
                             mPacketCallBack.onDataReceived(RECEIVED_SPORT_DATA);
                         }
                         break;
-                    case 9:
+                    case 0x0C:
                         //获取当日运动数据
                         mDailyData.Steps = data[0] & 0xFF;
                         mDailyData.Steps = (mDailyData.Steps << 8) | (data[1] & 0xFF);
