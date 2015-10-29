@@ -314,7 +314,26 @@ public class PacketParserService extends Service {
         send(send_packet);
         resent_cnt = 3;
     }
-
+    public void setWearHand(int hand){
+        Packet.PacketValue packetValue = new Packet.PacketValue();
+        packetValue.setCommandId((byte) (0x02));
+        packetValue.setKey((byte) (0x22));
+        packetValue.setValue(Packet.byteToByte((byte)hand));
+        send_packet.setPacketValue(packetValue, true);
+        send_packet.print();
+        send(send_packet);
+        resent_cnt = 3;
+    }
+    public void setHourFormat(int format){
+        Packet.PacketValue packetValue = new Packet.PacketValue();
+        packetValue.setCommandId((byte) (0x02));
+        packetValue.setKey((byte) (0x26));
+        packetValue.setValue(Packet.byteToByte((byte)format));
+        send_packet.setPacketValue(packetValue, true);
+        send_packet.print();
+        send(send_packet);
+        resent_cnt = 3;
+    }
     public static class DailyData {
         int Steps;
         int Distance;
@@ -335,11 +354,11 @@ public class PacketParserService extends Service {
         resent_cnt = 3;
     }
 
-    public void setSportNotify(byte notify) {
+    public void setSportNotify(int notify) {
         Packet.PacketValue packetValue = new Packet.PacketValue();
         packetValue.setCommandId((byte) (0x05));
         packetValue.setKey((byte) (0x06));
-        packetValue.setValue(Packet.byteToByte(notify));
+        packetValue.setValue(Packet.byteToByte((byte)notify));
         send_packet.setPacketValue(packetValue, true);
         send_packet.print();
         send(send_packet);

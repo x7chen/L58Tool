@@ -486,16 +486,6 @@ public class BluetoothLeService extends Service {
                             break;
                         }
                         writeCharacteristic(characteristic, data);
-                        String strBuilder = new String();
-                        if (data == null) {
-                            Log.i(TAG, "data is null");
-                            break;
-                        }
-                        for (byte bb : data) {
-                            strBuilder = strBuilder + Integer.toHexString(bb & 0xff).toUpperCase();
-                            strBuilder += " ";
-                        }
-                        Log.d(TAG, strBuilder);
                         break;
                     case NUS_TX_SET_NOTIFICATION:
                         Boolean notification = intent.getBooleanExtra(HandleData, false);

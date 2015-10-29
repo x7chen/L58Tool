@@ -80,7 +80,10 @@ public class TestFragment extends Fragment {
         mtestItemAdapter.addItem(new TestItem("设置防丢", ""));
         mtestItemAdapter.addItem(new TestItem("设置久坐", ""));
         mtestItemAdapter.addItem(new TestItem("获取当日数据", ""));
-
+        mtestItemAdapter.addItem(new TestItem("设置左右手", ""));
+        mtestItemAdapter.addItem(new TestItem("设置时间格式", ""));
+        mtestItemAdapter.addItem(new TestItem("模拟数据", ""));
+        mtestItemAdapter.addItem(new TestItem("打开实时数据", ""));
     }
 
     PacketParserService.CallBack callBack;
@@ -99,6 +102,7 @@ public class TestFragment extends Fragment {
 
             @Override
             public void onDataReceived(byte category) {
+                Log.i(BluetoothLeService.TAG,"onDataReceived.");
                 switch (category) {
                     case PacketParserService.RECEIVED_ALARM:
                         List<PacketParserService.Alarm> alarmList;
@@ -110,6 +114,8 @@ public class TestFragment extends Fragment {
                         }
                         break;
                     case PacketParserService.RECEIVED_DAILY_DATA:
+                        PacketParserService.DailyData dailyData;
+                        dailyData = packetParserService.getDailyDataList();
                         break;
                     case PacketParserService.RECEIVED_SPORT_DATA:
                         List<PacketParserService.SportData> sportDataList;
@@ -165,7 +171,6 @@ public class TestFragment extends Fragment {
                 switch (position) {
                     case 0:
                         packetParserService.setTime();
-                        packetParserService.mock();
                         break;
                     case 1:
                         packetParserService.getSportData();
@@ -217,7 +222,16 @@ public class TestFragment extends Fragment {
                         packetParserService.getDailyData();
                         break;
                     case 9:
-//                        packetParserService.
+                        packetParserService.setWearHand(1);
+                        break;
+                    case 10:
+                        packetParserService.setHourFormat(1);
+                        break;
+                    case 11:
+                        packetParserService.mock();
+                        break;
+                    case 12:
+                        packetParserService.setSportNotify(1);
                         break;
                     default:
 //                        PacketHandle.putExtra(PacketParserService.HANDLE,position+1);
