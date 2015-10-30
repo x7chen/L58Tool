@@ -712,7 +712,9 @@ public class PacketParserService extends Service {
                         send(send_packet);
                     }
                     else {
-                        mPacketCallBack.onSendFailure();
+                        if (mPacketCallBack != null) {
+                            mPacketCallBack.onSendFailure();
+                        }
                     }
                     receive_packet.clear();
                 }
