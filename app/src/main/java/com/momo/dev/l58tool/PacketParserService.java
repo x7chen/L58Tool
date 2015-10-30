@@ -94,6 +94,7 @@ public class PacketParserService extends Service {
 
     public interface CallBack {
         void onSendSuccess();
+        void onSendFailure();
         void onConnectStatusChanged(boolean status);
         void onDataReceived(byte category);
         void onCharacteristicNotFound();
@@ -709,6 +710,9 @@ public class PacketParserService extends Service {
                     if (0 < resent_cnt--) {
                         Log.i(BluetoothLeService.TAG, "Resent Packet!");
                         send(send_packet);
+                    }
+                    else {
+                        mPacketCallBack.onSendFailure();
                     }
                     receive_packet.clear();
                 }
