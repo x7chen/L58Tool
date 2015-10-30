@@ -819,7 +819,7 @@ public class PacketParserService extends Service {
                     mPacketCallBack.onDataReceived(RECEIVED_DAILY_DATA);
                 }
                 for (int i = 0; i < 8; i++) {
-                    PacketParserService.Alarm alarm = new PacketParserService.Alarm();
+                    Alarm alarm = new Alarm();
                     alarm.Year = 2015;
                     alarm.Month = 11;
                     alarm.Day = 21;
@@ -832,7 +832,7 @@ public class PacketParserService extends Service {
                 if(mPacketCallBack != null){
                     mPacketCallBack.onDataReceived(RECEIVED_ALARM);
                 }
-                PacketHandle.putExtra("Alarms",mAlarms);
+                PacketHandle.putParcelableArrayListExtra("Alarms",mAlarms);
                 sendBroadcast(PacketHandle);
             }
         }.start();
