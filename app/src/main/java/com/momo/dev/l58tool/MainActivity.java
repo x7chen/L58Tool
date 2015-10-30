@@ -18,10 +18,12 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+import java.util.ArrayList;
 import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity implements ActionBar.TabListener {
@@ -50,6 +52,11 @@ public class MainActivity extends AppCompatActivity implements ActionBar.TabList
 
     public PacketParserService getPacketParserService() {
         return packetParserService;
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        //super.onRestoreInstanceState(savedInstanceState);
     }
 
     @Override
@@ -259,6 +266,14 @@ public class MainActivity extends AppCompatActivity implements ActionBar.TabList
                 ScanFragment.BLE_CONNECT_STATUS = false;
                 Toast.makeText(MainActivity.this,R.string.device_disconnected,Toast.LENGTH_SHORT).show();
             }
+            else if (PacketParserService.ACTION_PACKET_HANDLE.equals(action)){
+                Log.i(BluetoothLeService.TAG,"alarms");
+                ArrayList<PacketParserService.Alarm> alarms;
+                alarms = intent.getParcelableArrayListExtra("Alarms");
+                for (PacketParserService.Alarm a:alarms){
+
+                }
+            }
         }
     };
     private static IntentFilter MyIntentFilter() {
@@ -267,6 +282,7 @@ public class MainActivity extends AppCompatActivity implements ActionBar.TabList
         intentFilter.addAction(BluetoothLeService.ACTION_GATT_DISCONNECTED);
         intentFilter.addAction(BluetoothLeService.ACTION_GATT_SERVICES_DISCOVERED);
         intentFilter.addAction(BluetoothLeService.ACTION_DATA_AVAILABLE);
+        intentFilter.addAction(PacketParserService.ACTION_PACKET_HANDLE);
 
         return intentFilter;
     }

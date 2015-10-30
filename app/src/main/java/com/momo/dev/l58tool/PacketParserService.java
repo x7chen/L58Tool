@@ -7,6 +7,8 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Binder;
 import android.os.IBinder;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
@@ -32,11 +34,12 @@ public class PacketParserService extends Service {
     private int resent_cnt = 0;
     private Intent GattCommand = new Intent(BluetoothLeService.ACTION_GATT_HANDLE);
 
+    private Intent PacketHandle = new Intent(ACTION_PACKET_HANDLE);
     private CallBack mPacketCallBack;
-    private List<Alarm> mAlarms = new ArrayList<Alarm>();
-    private List<SportData> mSportData = new ArrayList<SportData>();
-    private List<SleepData> mSleepData = new ArrayList<SleepData>();
-    private List<SleepSetting> mSleepSetting = new ArrayList<SleepSetting>();
+    private ArrayList<Alarm> mAlarms = new ArrayList<Alarm>();
+    private ArrayList<SportData> mSportData = new ArrayList<SportData>();
+    private ArrayList<SleepData> mSleepData = new ArrayList<SleepData>();
+    private ArrayList<SleepSetting> mSleepSetting = new ArrayList<SleepSetting>();
     private DailyData mDailyData = new DailyData();
     private LocalBinder mBinder = new LocalBinder();
 
@@ -120,28 +123,28 @@ public class PacketParserService extends Service {
         return mVERSION;
     }
 
-    public List<SportData> getSportDataList() {
-        List<SportData> nSportData = new ArrayList<SportData>();
+    public ArrayList<SportData> getSportDataList() {
+        ArrayList<SportData> nSportData = new ArrayList<SportData>();
         nSportData.addAll(mSportData);
         mSportData.clear();
         return nSportData;
     }
 
-    public List<SleepData> getSleepDataList() {
-        List<SleepData> nSleepData = new ArrayList<SleepData>();
+    public ArrayList<SleepData> getSleepDataList() {
+        ArrayList<SleepData> nSleepData = new ArrayList<SleepData>();
         nSleepData.addAll(mSleepData);
         mSleepData.clear();
         return nSleepData;
     }
 
-    public List<SleepSetting> getSleepSettingList() {
-        List<SleepSetting> nSleepSetting = new ArrayList<SleepSetting>();
+    public ArrayList<SleepSetting> getSleepSettingList() {
+        ArrayList<SleepSetting> nSleepSetting = new ArrayList<SleepSetting>();
         nSleepSetting.addAll(mSleepSetting);
         mSleepSetting.clear();
         return nSleepSetting;
     }
 
-    public List<Alarm> getAlarmsList() {
+    public ArrayList<Alarm> getAlarmsList() {
         return mAlarms;
     }
 
@@ -171,7 +174,7 @@ public class PacketParserService extends Service {
         resent_cnt = 3;
     }
 
-    public static class Alarm {
+    public static class Alarm implements Parcelable {
         public int ID;
         public int Year;
         public int Month;
@@ -179,6 +182,45 @@ public class PacketParserService extends Service {
         public int Hour;
         public int Minute;
         public int Repeat;
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeInt(this.ID);
+            dest.writeInt(this.Year);
+            dest.writeInt(this.Month);
+            dest.writeInt(this.Day);
+            dest.writeInt(this.Hour);
+            dest.writeInt(this.Minute);
+            dest.writeInt(this.Repeat);
+        }
+
+        public Alarm() {
+        }
+
+        protected Alarm(Parcel in) {
+            this.ID = in.readInt();
+            this.Year = in.readInt();
+            this.Month = in.readInt();
+            this.Day = in.readInt();
+            this.Hour = in.readInt();
+            this.Minute = in.readInt();
+            this.Repeat = in.readInt();
+        }
+
+        public static final Parcelable.Creator<Alarm> CREATOR = new Parcelable.Creator<Alarm>() {
+            public Alarm createFromParcel(Parcel source) {
+                return new Alarm(source);
+            }
+
+            public Alarm[] newArray(int size) {
+                return new Alarm[size];
+            }
+        };
     }
 
     private byte[] AlarmToByte(Alarm alarm) {
@@ -218,7 +260,7 @@ public class PacketParserService extends Service {
         return alarm;
     }
 
-    public void setAlarmList(List<Alarm> alarmList) {
+    public void setAlarmList(ArrayList<Alarm> alarmList) {
 
         byte[] aData;
         Packet.PacketValue packetValue = new Packet.PacketValue();
@@ -255,11 +297,44 @@ public class PacketParserService extends Service {
         resent_cnt = 3;
     }
 
-    public static class UserProfile {
+    public static class UserProfile implements Parcelable {
         public int Sex;
         public int Age;
         public int Stature;     //0.5cm
         public int Weight;      //0.5Kg
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeInt(this.Sex);
+            dest.writeInt(this.Age);
+            dest.writeInt(this.Stature);
+            dest.writeInt(this.Weight);
+        }
+
+        public UserProfile() {
+        }
+
+        protected UserProfile(Parcel in) {
+            this.Sex = in.readInt();
+            this.Age = in.readInt();
+            this.Stature = in.readInt();
+            this.Weight = in.readInt();
+        }
+
+        public static final Parcelable.Creator<UserProfile> CREATOR = new Parcelable.Creator<UserProfile>() {
+            public UserProfile createFromParcel(Parcel source) {
+                return new UserProfile(source);
+            }
+
+            public UserProfile[] newArray(int size) {
+                return new UserProfile[size];
+            }
+        };
     }
 
     public void setUserProfile(UserProfile userProfile) {
@@ -289,13 +364,50 @@ public class PacketParserService extends Service {
         resent_cnt = 3;
     }
 
-    public static class LongSitSetting {
+    public static class LongSitSetting implements Parcelable {
         public int Enable;
         public int ThresholdSteps;
         public int DurationTimeMinutes;
         public int StartTimeHour;
         public int EndTimeHour;
         public int Repeat;
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeInt(this.Enable);
+            dest.writeInt(this.ThresholdSteps);
+            dest.writeInt(this.DurationTimeMinutes);
+            dest.writeInt(this.StartTimeHour);
+            dest.writeInt(this.EndTimeHour);
+            dest.writeInt(this.Repeat);
+        }
+
+        public LongSitSetting() {
+        }
+
+        protected LongSitSetting(Parcel in) {
+            this.Enable = in.readInt();
+            this.ThresholdSteps = in.readInt();
+            this.DurationTimeMinutes = in.readInt();
+            this.StartTimeHour = in.readInt();
+            this.EndTimeHour = in.readInt();
+            this.Repeat = in.readInt();
+        }
+
+        public static final Parcelable.Creator<LongSitSetting> CREATOR = new Parcelable.Creator<LongSitSetting>() {
+            public LongSitSetting createFromParcel(Parcel source) {
+                return new LongSitSetting(source);
+            }
+
+            public LongSitSetting[] newArray(int size) {
+                return new LongSitSetting[size];
+            }
+        };
     }
 
     public void setLongSit(LongSitSetting longSit) {
@@ -335,10 +447,41 @@ public class PacketParserService extends Service {
         send(send_packet);
         resent_cnt = 3;
     }
-    public static class DailyData {
+    public static class DailyData implements Parcelable {
         int Steps;
         int Distance;
         int Calory;
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeInt(this.Steps);
+            dest.writeInt(this.Distance);
+            dest.writeInt(this.Calory);
+        }
+
+        public DailyData() {
+        }
+
+        protected DailyData(Parcel in) {
+            this.Steps = in.readInt();
+            this.Distance = in.readInt();
+            this.Calory = in.readInt();
+        }
+
+        public static final Parcelable.Creator<DailyData> CREATOR = new Parcelable.Creator<DailyData>() {
+            public DailyData createFromParcel(Parcel source) {
+                return new DailyData(source);
+            }
+
+            public DailyData[] newArray(int size) {
+                return new DailyData[size];
+            }
+        };
     }
 
     public DailyData getDailyDataList() {
@@ -366,7 +509,7 @@ public class PacketParserService extends Service {
         resent_cnt = 3;
     }
 
-    public static class SportData {
+    public static class SportData implements Parcelable {
         public int Year;
         public int Month;
         public int Day;
@@ -377,24 +520,143 @@ public class PacketParserService extends Service {
         public int ActiveTime;
         public int Distance;
         public int Calory;
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeInt(this.Year);
+            dest.writeInt(this.Month);
+            dest.writeInt(this.Day);
+            dest.writeInt(this.Hour);
+            dest.writeInt(this.Minute);
+            dest.writeInt(this.Mode);
+            dest.writeInt(this.Steps);
+            dest.writeInt(this.ActiveTime);
+            dest.writeInt(this.Distance);
+            dest.writeInt(this.Calory);
+        }
+
+        public SportData() {
+        }
+
+        protected SportData(Parcel in) {
+            this.Year = in.readInt();
+            this.Month = in.readInt();
+            this.Day = in.readInt();
+            this.Hour = in.readInt();
+            this.Minute = in.readInt();
+            this.Mode = in.readInt();
+            this.Steps = in.readInt();
+            this.ActiveTime = in.readInt();
+            this.Distance = in.readInt();
+            this.Calory = in.readInt();
+        }
+
+        public static final Parcelable.Creator<SportData> CREATOR = new Parcelable.Creator<SportData>() {
+            public SportData createFromParcel(Parcel source) {
+                return new SportData(source);
+            }
+
+            public SportData[] newArray(int size) {
+                return new SportData[size];
+            }
+        };
     }
 
-    public static class SleepData {
+    public static class SleepData implements Parcelable {
         public int Year;
         public int Month;
         public int Day;
         public int Hour;
         public int Minute;
         public int Mode;
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeInt(this.Year);
+            dest.writeInt(this.Month);
+            dest.writeInt(this.Day);
+            dest.writeInt(this.Hour);
+            dest.writeInt(this.Minute);
+            dest.writeInt(this.Mode);
+        }
+
+        public SleepData() {
+        }
+
+        protected SleepData(Parcel in) {
+            this.Year = in.readInt();
+            this.Month = in.readInt();
+            this.Day = in.readInt();
+            this.Hour = in.readInt();
+            this.Minute = in.readInt();
+            this.Mode = in.readInt();
+        }
+
+        public static final Parcelable.Creator<SleepData> CREATOR = new Parcelable.Creator<SleepData>() {
+            public SleepData createFromParcel(Parcel source) {
+                return new SleepData(source);
+            }
+
+            public SleepData[] newArray(int size) {
+                return new SleepData[size];
+            }
+        };
     }
 
-    public static class SleepSetting {
+    public static class SleepSetting implements Parcelable {
         public int Year;
         public int Month;
         public int Day;
         public int Hour;
         public int Minute;
         public int Mode;
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeInt(this.Year);
+            dest.writeInt(this.Month);
+            dest.writeInt(this.Day);
+            dest.writeInt(this.Hour);
+            dest.writeInt(this.Minute);
+            dest.writeInt(this.Mode);
+        }
+
+        public SleepSetting() {
+        }
+
+        protected SleepSetting(Parcel in) {
+            this.Year = in.readInt();
+            this.Month = in.readInt();
+            this.Day = in.readInt();
+            this.Hour = in.readInt();
+            this.Minute = in.readInt();
+            this.Mode = in.readInt();
+        }
+
+        public static final Parcelable.Creator<SleepSetting> CREATOR = new Parcelable.Creator<SleepSetting>() {
+            public SleepSetting createFromParcel(Parcel source) {
+                return new SleepSetting(source);
+            }
+
+            public SleepSetting[] newArray(int size) {
+                return new SleepSetting[size];
+            }
+        };
     }
 
     private SportData SportDataFromByte(byte[] header, byte[] data) {
@@ -556,6 +818,22 @@ public class PacketParserService extends Service {
                 if(mPacketCallBack != null){
                     mPacketCallBack.onDataReceived(RECEIVED_DAILY_DATA);
                 }
+                for (int i = 0; i < 8; i++) {
+                    PacketParserService.Alarm alarm = new PacketParserService.Alarm();
+                    alarm.Year = 2015;
+                    alarm.Month = 11;
+                    alarm.Day = 21;
+                    alarm.Hour = 15;
+                    alarm.Minute = 0;
+                    alarm.Repeat = 0x7F;
+                    alarm.ID = i;
+                    mAlarms.add(alarm);
+                }
+                if(mPacketCallBack != null){
+                    mPacketCallBack.onDataReceived(RECEIVED_ALARM);
+                }
+                PacketHandle.putExtra("Alarms",mAlarms);
+                sendBroadcast(PacketHandle);
             }
         }.start();
     }
@@ -605,13 +883,14 @@ public class PacketParserService extends Service {
                 switch (key) {
                     case 4:
                         //获取闹钟
+                        mAlarms.clear();
                         for (int i = 0; i < length; i += 5) {
                             mAlarms.add(AlarmFromByte(Arrays.copyOfRange(data, i, i + 5)));
                         }
                         if (mPacketCallBack != null) {
                             mPacketCallBack.onDataReceived(RECEIVED_ALARM);
                         }
-                        mAlarms.clear();
+
                         break;
                     default:
                         break;

@@ -181,7 +181,7 @@ public class TestFragment extends Fragment {
                         packetParserService.getSportData();
                         break;
                     case 2:
-                        List<PacketParserService.Alarm> alarmList = new ArrayList<PacketParserService.Alarm>();
+                        ArrayList<PacketParserService.Alarm> alarmList = new ArrayList<PacketParserService.Alarm>();
                         for (int i = 0; i < 8; i++) {
                             PacketParserService.Alarm alarm = new PacketParserService.Alarm();
                             alarm.Year = 2015;
@@ -194,7 +194,6 @@ public class TestFragment extends Fragment {
                             alarmList.add(alarm);
                         }
                         packetParserService.setAlarmList(alarmList);
-                        packetParserService.mock();
                         break;
                     case 3:
                         packetParserService.getAlarms();
