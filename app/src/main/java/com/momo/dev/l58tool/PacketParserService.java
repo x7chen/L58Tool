@@ -186,7 +186,7 @@ public class PacketParserService extends Service {
         aData = aData << 4 | (alarm.Month & 0x0F);
         aData = aData << 5 | (alarm.Day & 0x1F);
         aData = aData << 5 | (alarm.Hour & 0x1F);
-        aData = aData << 6 | (alarm.Minute & 0x1F);
+        aData = aData << 6 | (alarm.Minute & 0x3F);
         aData = aData << 3 | (alarm.ID & 0x07);
         aData = aData << 4;
         aData = aData << 7 | (alarm.Repeat & 0x7F);
