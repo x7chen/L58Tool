@@ -96,6 +96,11 @@ public class TestFragment extends Fragment {
             }
 
             @Override
+            public void onSendFailure() {
+
+            }
+
+            @Override
             public void onConnectStatusChanged(boolean status) {
                 Log.i(BluetoothLeService.TAG, "Connect Status Changed:" + status);
             }
