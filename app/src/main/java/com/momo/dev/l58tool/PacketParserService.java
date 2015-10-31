@@ -15,7 +15,6 @@ import android.util.Log;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
-import java.util.List;
 import java.util.Random;
 
 /**
@@ -97,9 +96,13 @@ public class PacketParserService extends Service {
 
     public interface CallBack {
         void onSendSuccess();
+
         void onSendFailure();
+
         void onConnectStatusChanged(boolean status);
+
         void onDataReceived(byte category);
+
         void onCharacteristicNotFound();
     }
 
@@ -162,7 +165,7 @@ public class PacketParserService extends Service {
         aData = aData << 5 | (day & 0x1F);
         aData = aData << 5 | (hour & 0x1F);
         aData = aData << 6 | (minute & 0x3F);
-        aData = aData << 6 | (second & 0x1F);
+        aData = aData << 6 | (second & 0x3F);
 
         Packet.PacketValue packetValue = new Packet.PacketValue();
         packetValue.setCommandId((byte) (0x02));
@@ -427,26 +430,29 @@ public class PacketParserService extends Service {
         send(send_packet);
         resent_cnt = 3;
     }
-    public void setWearHand(int hand){
+
+    public void setWearHand(int hand) {
         Packet.PacketValue packetValue = new Packet.PacketValue();
         packetValue.setCommandId((byte) (0x02));
         packetValue.setKey((byte) (0x22));
-        packetValue.setValue(Packet.byteToByte((byte)hand));
+        packetValue.setValue(Packet.byteToByte((byte) hand));
         send_packet.setPacketValue(packetValue, true);
         send_packet.print();
         send(send_packet);
         resent_cnt = 3;
     }
-    public void setHourFormat(int format){
+
+    public void setHourFormat(int format) {
         Packet.PacketValue packetValue = new Packet.PacketValue();
         packetValue.setCommandId((byte) (0x02));
         packetValue.setKey((byte) (0x26));
-        packetValue.setValue(Packet.byteToByte((byte)format));
+        packetValue.setValue(Packet.byteToByte((byte) format));
         send_packet.setPacketValue(packetValue, true);
         send_packet.print();
         send(send_packet);
         resent_cnt = 3;
     }
+
     public static class DailyData implements Parcelable {
         int Steps;
         int Distance;
@@ -502,7 +508,7 @@ public class PacketParserService extends Service {
         Packet.PacketValue packetValue = new Packet.PacketValue();
         packetValue.setCommandId((byte) (0x05));
         packetValue.setKey((byte) (0x06));
-        packetValue.setValue(Packet.byteToByte((byte)notify));
+        packetValue.setValue(Packet.byteToByte((byte) notify));
         send_packet.setPacketValue(packetValue, true);
         send_packet.print();
         send(send_packet);
@@ -765,7 +771,7 @@ public class PacketParserService extends Service {
     }
 
     public void mock() {
-        new Thread(){
+        new Thread() {
             @Override
             public void run() {
                 super.run();
@@ -807,7 +813,7 @@ public class PacketParserService extends Service {
                     sleepData.Mode = Math.abs(random.nextInt()) % 2;
                     mSleepData.add(sleepData);
                 }
-                if(mPacketCallBack != null){
+                if (mPacketCallBack != null) {
                     mPacketCallBack.onDataReceived(RECEIVED_SPORT_DATA);
                 }
                 DailyData dailyData = new DailyData();
@@ -815,7 +821,7 @@ public class PacketParserService extends Service {
                 dailyData.Distance = Math.abs(random.nextInt()) % 1000;
                 dailyData.Calory = Math.abs(random.nextInt()) % 1000;
                 mDailyData = dailyData;
-                if(mPacketCallBack != null){
+                if (mPacketCallBack != null) {
                     mPacketCallBack.onDataReceived(RECEIVED_DAILY_DATA);
                 }
                 for (int i = 0; i < 8; i++) {
@@ -829,10 +835,10 @@ public class PacketParserService extends Service {
                     alarm.ID = i;
                     mAlarms.add(alarm);
                 }
-                if(mPacketCallBack != null){
+                if (mPacketCallBack != null) {
                     mPacketCallBack.onDataReceived(RECEIVED_ALARM);
                 }
-                PacketHandle.putParcelableArrayListExtra("Alarms",mAlarms);
+                PacketHandle.putParcelableArrayListExtra("Alarms", mAlarms);
                 sendBroadcast(PacketHandle);
             }
         }.start();
@@ -989,8 +995,7 @@ public class PacketParserService extends Service {
                     if (0 < resent_cnt--) {
                         Log.i(BluetoothLeService.TAG, "Resent Packet!");
                         send(send_packet);
-                    }
-                    else {
+                    } else {
                         if (mPacketCallBack != null) {
                             mPacketCallBack.onSendFailure();
                         }
@@ -1041,8 +1046,7 @@ public class PacketParserService extends Service {
                 }
                 receive_packet.clear();
                 send_packet.clear();
-            }
-            else if(BluetoothLeService.ACTION_GATT_CHARACTERISTIC_NOT_FOUND.equals(action)){
+            } else if (BluetoothLeService.ACTION_GATT_CHARACTERISTIC_NOT_FOUND.equals(action)) {
                 if (mPacketCallBack != null) {
                     mPacketCallBack.onCharacteristicNotFound();
                 }
