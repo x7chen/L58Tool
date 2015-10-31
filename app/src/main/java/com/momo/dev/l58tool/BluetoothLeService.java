@@ -472,11 +472,15 @@ public class BluetoothLeService extends Service {
                         Log.i(TAG, "nordic_ble_nus_write_characteristic");
                         if (mBluetoothAdapter == null || mBluetoothGatt == null) {
                             Log.w(TAG, "BluetoothAdapter not initialized");
+                            intentAction = ACTION_GATT_CHARACTERISTIC_NOT_FOUND;
+                            broadcastUpdate(intentAction);
                             break;
                         }
                         service = mBluetoothGatt.getService(NUS_SERVICE_UUID);
                         if (service == null) {
                             Log.i(TAG, "NUS service is not exist!");
+                            intentAction = ACTION_GATT_CHARACTERISTIC_NOT_FOUND;
+                            broadcastUpdate(intentAction);
                             break;
                         }
                         characteristic = service.getCharacteristic(RX_CHAR_UUID);
@@ -494,11 +498,15 @@ public class BluetoothLeService extends Service {
                         }
                         if (mBluetoothAdapter == null || mBluetoothGatt == null) {
                             Log.w(TAG, "BluetoothAdapter not initialized");
+                            intentAction = ACTION_GATT_CHARACTERISTIC_NOT_FOUND;
+                            broadcastUpdate(intentAction);
                             break;
                         }
                         service = mBluetoothGatt.getService(NUS_SERVICE_UUID);
                         if (service == null) {
                             Log.i(TAG, "NUS service is not exist!");
+                            intentAction = ACTION_GATT_CHARACTERISTIC_NOT_FOUND;
+                            broadcastUpdate(intentAction);
                             break;
                         }
                         characteristic = service.getCharacteristic(TX_CHAR_UUID);
