@@ -58,7 +58,7 @@ public class Packet {
         List<Byte> nPacket = new ArrayList<Byte>();
         nPacket.addAll(l1header.toList());
         //subList(起始（包含），终止（不包含））
-        if(mPacket !=null) {
+        if(mPacket.size() > 8) {
             nPacket.addAll(mPacket.subList(8, mPacket.size()));
         }
         mPacket = nPacket;
