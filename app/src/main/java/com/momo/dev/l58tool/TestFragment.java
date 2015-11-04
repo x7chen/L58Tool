@@ -21,6 +21,7 @@ import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 public class TestFragment extends Fragment {
     // TODO: Rename parameter arguments, choose names that match
@@ -161,7 +162,7 @@ public class TestFragment extends Fragment {
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-
+                Random random = new Random();
                 if (packetParserService == null) {
                     packetParserService = ((MainActivity) getActivity()).getPacketParserService();
                     if (packetParserService == null) {
@@ -218,7 +219,7 @@ public class TestFragment extends Fragment {
                         longSitSetting.ThresholdSteps = 100;
                         longSitSetting.DurationTimeMinutes = 30;
                         longSitSetting.StartTimeHour = 8;
-                        longSitSetting.EndTimeHour = 12;
+                        longSitSetting.EndTimeHour = 23;
                         longSitSetting.Repeat = 0x7F;
                         packetParserService.setLongSit(longSitSetting);
                         break;
@@ -229,7 +230,7 @@ public class TestFragment extends Fragment {
                         packetParserService.setWearHand(1);
                         break;
                     case 10:
-                        packetParserService.setHourFormat(1);
+                        packetParserService.setHourFormat(Math.abs(random.nextInt())%2);
                         break;
                     case 11:
                         packetParserService.mock();

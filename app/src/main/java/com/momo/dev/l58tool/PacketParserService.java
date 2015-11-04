@@ -119,6 +119,7 @@ public class PacketParserService extends Service {
         l1Header.setCRC16((short) 0);
         send_packet.setL1Header(l1Header);
         send_packet.setPacketValue(null, false);
+        send_packet.print();
         send(send_packet);
     }
 
