@@ -87,10 +87,7 @@ public class TestFragment extends Fragment {
         mtestItemAdapter.addItem(new TestItem("打开实时数据", ""));
     }
 
-    PacketParserService.CallBack callBack;
-
-    {
-        callBack = new PacketParserService.CallBack() {
+    PacketParserService.CallBack callBack = new PacketParserService.CallBack() {
             @Override
             public void onSendSuccess() {
                 Log.i(BluetoothLeService.TAG, "Command Send Success!");
@@ -172,7 +169,6 @@ public class TestFragment extends Fragment {
                 Log.i(BluetoothLeService.TAG, "onCharacteristicNotFound.");
             }
         };
-    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
