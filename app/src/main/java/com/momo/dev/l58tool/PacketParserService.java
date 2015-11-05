@@ -6,12 +6,15 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Binder;
+import android.os.Environment;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.support.annotation.Nullable;
 import android.util.Log;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -49,7 +52,21 @@ public class PacketParserService extends Service {
     private Packet send_packet = new Packet();
     private Packet receive_packet = new Packet();
 
-    @Nullable
+
+
+    static void writeLog(String content) {
+        String logFileName = Environment.getExternalStorageDirectory().getAbsolutePath();
+        logFileName += "/L58Tool/Log.txt";
+        FileWriter fileWriter;
+        try {
+            fileWriter = new FileWriter(logFileName, true);
+            fileWriter.append(content);
+            fileWriter.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     @Override
     public IBinder onBind(Intent intent) {
         return mBinder;
@@ -67,6 +84,8 @@ public class PacketParserService extends Service {
         registerReceiver(MyReceiver, MyIntentFilter());
         final Intent intent = new Intent(this, BluetoothLeService.class);
         startService(intent);
+
+
     }
 
     @Override
@@ -350,6 +369,7 @@ public class PacketParserService extends Service {
         aData = aData << 7 | (userProfile.Age & 0x7F);
         aData = aData << 9 | (userProfile.Stature & 0x1FF);
         aData = aData << 10 | (userProfile.Weight & 0x3FF);
+        aData = aData << 5;
         packetValue.setValue(Packet.intToByte(aData));
         send_packet.setPacketValue(packetValue, true);
         send_packet.print();
@@ -986,6 +1006,7 @@ public class PacketParserService extends Service {
                 }
                 //发送成功
                 else if (checkResult == 0x10) {
+                    writeLog("Send:" + send_packet.toString());
                     receive_packet.clear();
                     if (mPacketCallBack != null) {
                         mPacketCallBack.onSendSuccess();
@@ -1013,6 +1034,7 @@ public class PacketParserService extends Service {
                     }
                     Log.i(BluetoothLeService.TAG, "Send ACK!");
                     sendACK(receive_packet, false);
+                    writeLog("Receive:" + receive_packet.toString());
                     receive_packet.clear();
                 }
                 //接收数据包校验错误

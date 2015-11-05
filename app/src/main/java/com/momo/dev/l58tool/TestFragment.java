@@ -108,34 +108,56 @@ public class TestFragment extends Fragment {
 
             @Override
             public void onDataReceived(byte category) {
-                Log.i(BluetoothLeService.TAG,"onDataReceived.");
+                StringBuilder stringBuilder = new StringBuilder();
+                Log.i(BluetoothLeService.TAG, "onDataReceived.");
                 switch (category) {
                     case PacketParserService.RECEIVED_ALARM:
                         List<PacketParserService.Alarm> alarmList;
-                        if(packetParserService != null) {
+                        if (packetParserService != null) {
                             alarmList = packetParserService.getAlarmsList();
-                            for (PacketParserService.Alarm alarm:alarmList){
-
+                            stringBuilder.append("[AlarmList]\n");
+                            for (PacketParserService.Alarm alarm : alarmList) {
+                                stringBuilder.append("Hour:" + alarm.Hour + "  Minute:" + alarm.Minute + "  Repeat:" + alarm.Repeat+"\n");
                             }
+                            stringBuilder.append("\n\n");
+                            PacketParserService.writeLog(stringBuilder.toString());
                         }
                         break;
                     case PacketParserService.RECEIVED_DAILY_DATA:
                         PacketParserService.DailyData dailyData;
                         dailyData = packetParserService.getDailyDataList();
+                        stringBuilder.append("[DailyData]\n");
+                        stringBuilder.append("Steps:" + dailyData.Steps + "  Distance:" + dailyData.Distance + "  Calories:" + dailyData.Calory);
+                        stringBuilder.append("\n\n");
+                        PacketParserService.writeLog(stringBuilder.toString());
                         break;
                     case PacketParserService.RECEIVED_SPORT_DATA:
                         List<PacketParserService.SportData> sportDataList;
-                        if(packetParserService != null) {
-                            sportDataList = packetParserService.getSportDataList();
-                            for (PacketParserService.SportData sportData:sportDataList){
-
-                            }
-                        }
                         List<PacketParserService.SleepData> sleepDataList;
-                        if(packetParserService != null) {
+                        if (packetParserService != null) {
+                            sportDataList = packetParserService.getSportDataList();
+                            if(sportDataList.size() != 0) {
+                                stringBuilder.append("[SportData]\n");
+                                for (PacketParserService.SportData sportData : sportDataList) {
+                                    stringBuilder.append(sportData.Year + "." + sportData.Month + "." + sportData.Day + "  ");
+                                    stringBuilder.append(sportData.Hour + ":" + sportData.Minute + "\n");
+                                    stringBuilder.append("Steps:" + sportData.Steps + "  Distance:" + sportData.Distance + "  Calories:" + sportData.Calory + "\n");
+                                }
+                                sportDataList.clear();
+                                stringBuilder.append("\n\n");
+                                PacketParserService.writeLog(stringBuilder.toString());
+                            }
                             sleepDataList = packetParserService.getSleepDataList();
-                            for (PacketParserService.SleepData sleepData:sleepDataList){
-
+                            if(sleepDataList.size() != 0) {
+                                stringBuilder.append("[SleepData]\n");
+                                for (PacketParserService.SleepData sleepData : sleepDataList) {
+                                    stringBuilder.append(sleepData.Year + "." + sleepData.Month + "." + sleepData.Day + "  ");
+                                    stringBuilder.append(sleepData.Hour + ":" + sleepData.Minute + "  ");
+                                    stringBuilder.append("Mode:" + sleepData.Mode + "\n");
+                                }
+                                sleepDataList.clear();
+                                stringBuilder.append("\n\n");
+                                PacketParserService.writeLog(stringBuilder.toString());
                             }
                         }
                         break;
@@ -206,8 +228,8 @@ public class TestFragment extends Fragment {
                         PacketParserService.UserProfile userProfile = new PacketParserService.UserProfile();
                         userProfile.Sex = 1;
                         userProfile.Age = 30;
-                        userProfile.Stature = 340;
-                        userProfile.Weight = 200;
+                        userProfile.Stature = 170;
+                        userProfile.Weight = 50;
                         packetParserService.setUserProfile(userProfile);
                         break;
                     case 6:
@@ -230,7 +252,7 @@ public class TestFragment extends Fragment {
                         packetParserService.setWearHand(1);
                         break;
                     case 10:
-                        packetParserService.setHourFormat(Math.abs(random.nextInt())%2);
+                        packetParserService.setHourFormat(Math.abs(random.nextInt()) % 2);
                         break;
                     case 11:
                         packetParserService.mock();

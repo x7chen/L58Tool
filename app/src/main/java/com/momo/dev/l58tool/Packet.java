@@ -163,20 +163,29 @@ public class Packet {
     }
 
     public void print() {
-        String strBuilder = new String();
+        StringBuilder strBuilder = new StringBuilder();
         for (byte bb : getPacket()) {
-            strBuilder = strBuilder + Integer.toHexString(bb & 0xff).toUpperCase();
-            strBuilder += " ";
+            strBuilder.append(String.format("%02X ", bb));
         }
-        Log.i(BluetoothLeService.TAG, this.toString()+":"+strBuilder);
+        strBuilder.append("\n");
+        Log.i(BluetoothLeService.TAG, strBuilder.toString());
+    }
+    @Override
+    public  String toString(){
+        StringBuilder strBuilder = new StringBuilder();
+        for (byte bb : getPacket()) {
+            strBuilder.append(String.format("%02X ", bb));
+        }
+        strBuilder.append("\n");
+        return strBuilder.toString();
     }
     public static void Print(List<Byte> data){
-        String strBuilder = new String();
-        for (Byte bb : data) {
-            strBuilder = strBuilder + Integer.toHexString(bb & 0xff).toUpperCase();
-            strBuilder += " ";
+        StringBuilder strBuilder = new StringBuilder();
+        for (byte bb : data) {
+            strBuilder.append(String.format("%02X ", bb));
         }
-        Log.i(BluetoothLeService.TAG, "Print:"+strBuilder);
+        strBuilder.append("\n");
+        Log.i(BluetoothLeService.TAG, "Print:"+strBuilder.toString());
     }
 
 
