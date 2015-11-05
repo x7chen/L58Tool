@@ -1,6 +1,5 @@
 package com.momo.dev.l58tool;
 
-import android.app.Notification;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -9,21 +8,17 @@ import android.content.IntentFilter;
 import android.os.Binder;
 import android.os.Environment;
 import android.os.IBinder;
-import android.os.Looper;
 import android.os.Message;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
 
-import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Random;
-import java.util.logging.Handler;
-import java.util.logging.LogRecord;
 
 /**
  * Created by Administrator on 2015/10/16.
