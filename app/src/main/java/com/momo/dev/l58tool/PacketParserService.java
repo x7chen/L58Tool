@@ -1,5 +1,6 @@
 package com.momo.dev.l58tool;
 
+import android.app.Notification;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -8,6 +9,8 @@ import android.content.IntentFilter;
 import android.os.Binder;
 import android.os.Environment;
 import android.os.IBinder;
+import android.os.Looper;
+import android.os.Message;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
@@ -19,6 +22,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Random;
+import java.util.logging.Handler;
+import java.util.logging.LogRecord;
 
 /**
  * Created by Administrator on 2015/10/16.
@@ -45,6 +50,8 @@ public class PacketParserService extends Service {
     private DailyData mDailyData = new DailyData();
     private LocalBinder mBinder = new LocalBinder();
 
+    private TimerThread sendTimerThread;
+    private TimerThread receiveTimerThread;
     public static final byte RECEIVED_ALARM = 1;
     public static final byte RECEIVED_SPORT_DATA = 2;
     public static final byte RECEIVED_DAILY_DATA = 3;
@@ -52,7 +59,20 @@ public class PacketParserService extends Service {
     private Packet send_packet = new Packet();
     private Packet receive_packet = new Packet();
 
-
+    final android.os.Handler mHandler = new android.os.Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            if (msg.what == 0xAA) {
+                if (mPacketCallBack != null) {
+                    mPacketCallBack.onTimeOut();
+                    Log.i(BluetoothLeService.TAG, "Receive TimeOut!");
+                }
+            } else if (msg.what == 0xBB) {
+                receive_packet.clear();
+            }
+        }
+    };
 
     static void writeLog(String content) {
         String logFileName = Environment.getExternalStorageDirectory().getAbsolutePath();
@@ -84,8 +104,10 @@ public class PacketParserService extends Service {
         registerReceiver(MyReceiver, MyIntentFilter());
         final Intent intent = new Intent(this, BluetoothLeService.class);
         startService(intent);
-
-
+        sendTimerThread = new TimerThread().setStatus(TimerThread.STOP).setWhat(0xAA);
+        sendTimerThread.start();
+        receiveTimerThread = new TimerThread().setStatus(TimerThread.STOP).setWhat(0xBB);
+        receiveTimerThread.start();
     }
 
     @Override
@@ -93,6 +115,8 @@ public class PacketParserService extends Service {
         super.onDestroy();
         final Intent intent = new Intent(this, BluetoothLeService.class);
         stopService(intent);
+        sendTimerThread.setStatus(TimerThread.EXIT);
+        receiveTimerThread.setStatus(TimerThread.EXIT);
     }
 
     public void connect(String address) {
@@ -117,6 +141,8 @@ public class PacketParserService extends Service {
         void onSendSuccess();
 
         void onSendFailure();
+
+        void onTimeOut();
 
         void onConnectStatusChanged(boolean status);
 
@@ -898,6 +924,8 @@ public class PacketParserService extends Service {
                 }
             }
         }, "Tread-BLESend").start();
+        sendTimerThread.setTimeOut(100).setStatus(TimerThread.RESTART);
+
     }
 
     private void resolve(Packet.PacketValue packetValue) {
@@ -960,6 +988,8 @@ public class PacketParserService extends Service {
                         //同步结束
                         if (mPacketCallBack != null) {
                             mPacketCallBack.onDataReceived(RECEIVED_SPORT_DATA);
+                        } else {
+                            writeLog("Error:CallBack is Null!\n");
                         }
                         break;
                     case 0x0C:
@@ -988,6 +1018,77 @@ public class PacketParserService extends Service {
         }
     }
 
+
+    class TimerThread extends Thread {
+        static final String START = "start";
+        static final String RESTART = "restart";
+        static final String PAUSE = "pause";
+        static final String STOP = "stop";
+        static final String EXIT = "exit";
+        int TimeOut = 100;
+        int mCount = 0;
+        int What = 0;
+        public String Status;
+
+        public void run() {
+            while (true) {
+                if (START.equals(Status)) {
+                    try {
+                        Thread.sleep(20);
+                        mCount++;
+
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                } else if (RESTART.equals(Status)) {
+                    mCount = 0;
+                    Status = START;
+                    Thread.yield();
+                } else if (PAUSE.equals(Status)) {
+                    Thread.yield();
+                } else if (STOP.equals(Status)) {
+                    mCount = 0;
+                    Thread.yield();
+                } else if (EXIT.equals(Status)) {
+                    break;
+                }
+                if (mCount >= TimeOut) {
+                    mHandler.sendEmptyMessage(What);
+                    mCount = 0;
+                    Status = STOP;
+                }
+
+            }
+        }
+
+        public int getWhat() {
+            return What;
+        }
+
+        public TimerThread setWhat(int what) {
+            What = what;
+            return this;
+        }
+
+        public String getStatus() {
+            return Status;
+        }
+
+        public TimerThread setStatus(String status) {
+            Status = status;
+            return this;
+        }
+
+        public int getTimeOut() {
+            return TimeOut;
+        }
+
+        public TimerThread setTimeOut(int mTimeOut) {
+            this.TimeOut = mTimeOut;
+            return this;
+        }
+    }
+
     private BroadcastReceiver MyReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -997,6 +1098,7 @@ public class PacketParserService extends Service {
             } else if (BluetoothLeService.ACTION_DATA_AVAILABLE.equals(action)) {
                 byte[] data = intent.getByteArrayExtra(BluetoothLeService.HandleData);
                 receive_packet.append(data);
+                receiveTimerThread.setTimeOut(100).setStatus(TimerThread.RESTART);
                 int checkResult = receive_packet.checkPacket();
                 Log.i(BluetoothLeService.TAG, "Check:" + Integer.toHexString(checkResult));
                 receive_packet.print();
@@ -1011,6 +1113,7 @@ public class PacketParserService extends Service {
                     if (mPacketCallBack != null) {
                         mPacketCallBack.onSendSuccess();
                     }
+                    sendTimerThread.setStatus(TimerThread.STOP);
                 }
                 //ACK错误，需要重发
                 else if (checkResult == 0x30) {
@@ -1036,6 +1139,7 @@ public class PacketParserService extends Service {
                     sendACK(receive_packet, false);
                     writeLog("Receive:" + receive_packet.toString());
                     receive_packet.clear();
+                    receiveTimerThread.setStatus(TimerThread.STOP);
                 }
                 //接收数据包校验错误
                 else if (checkResult == 0x0b) {

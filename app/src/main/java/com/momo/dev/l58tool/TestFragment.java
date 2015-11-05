@@ -98,7 +98,12 @@ public class TestFragment extends Fragment {
 
             }
 
-            @Override
+        @Override
+        public void onTimeOut() {
+
+        }
+
+        @Override
             public void onConnectStatusChanged(boolean status) {
                 Log.i(BluetoothLeService.TAG, "Connect Status Changed:" + status);
             }
