@@ -66,7 +66,7 @@ public class PacketParserService extends Service {
             if (msg.what == 0xAA) {
                 if (mPacketCallBack != null) {
                     mPacketCallBack.onTimeOut();
-                    Log.i(BluetoothLeService.TAG, "Receive TimeOut!");
+                    Log.i(BluetoothLeService.TAG, "ACK TimeOut!");
                 }
             } else if (msg.what == 0xBB) {
                 receive_packet.clear();
