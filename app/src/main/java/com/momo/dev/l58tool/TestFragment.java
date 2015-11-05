@@ -1,13 +1,9 @@
 package com.momo.dev.l58tool;
 
 import android.app.Activity;
-import android.app.Service;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -115,9 +111,9 @@ public class TestFragment extends Fragment {
             switch (category) {
                 case PacketParserService.RECEIVED_ALARM:
                     List<PacketParserService.Alarm> alarmList;
-                    stringBuilder = new StringBuilder();
                     if (packetParserService != null) {
                         alarmList = packetParserService.getAlarmsList();
+                        stringBuilder = new StringBuilder();
                         stringBuilder.append("[AlarmList]\n");
                         for (PacketParserService.Alarm alarm : alarmList) {
                             stringBuilder.append("Hour:" + alarm.Hour + "  Minute:" + alarm.Minute + "  Repeat:" + alarm.Repeat + "\n");
@@ -128,8 +124,8 @@ public class TestFragment extends Fragment {
                     break;
                 case PacketParserService.RECEIVED_DAILY_DATA:
                     PacketParserService.DailyData dailyData;
-                    stringBuilder = new StringBuilder();
                     dailyData = packetParserService.getDailyDataList();
+                    stringBuilder = new StringBuilder();
                     stringBuilder.append("[DailyData]\n");
                     stringBuilder.append("Steps:" + dailyData.Steps + "  Distance:" + dailyData.Distance + "  Calories:" + dailyData.Calory);
                     stringBuilder.append("\n\n");
@@ -141,7 +137,7 @@ public class TestFragment extends Fragment {
 
                     if (packetParserService != null) {
                         sportDataList = packetParserService.getSportDataList();
-                        stringBuilder =new StringBuilder();
+                        stringBuilder = new StringBuilder();
                         if (sportDataList.size() != 0) {
                             stringBuilder.append("[SportData]\n");
                             for (PacketParserService.SportData sportData : sportDataList) {
