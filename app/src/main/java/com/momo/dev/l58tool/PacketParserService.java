@@ -13,6 +13,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
 
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -70,8 +71,12 @@ public class PacketParserService extends Service {
     };
 
     static void writeLog(String content) {
-        String logFileName = Environment.getExternalStorageDirectory().getAbsolutePath();
-        logFileName += "/L58Tool/Log.txt";
+        String logFileName = Environment.getExternalStorageDirectory().getAbsolutePath()+"/L58Tool";
+        File file = new File(logFileName);
+        if(!file.exists()){
+            file.mkdirs();
+        }
+        logFileName += "/Log.txt";
         FileWriter fileWriter;
         try {
             fileWriter = new FileWriter(logFileName, true);
