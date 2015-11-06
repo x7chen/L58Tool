@@ -70,8 +70,12 @@ public class PacketParserService extends Service {
     };
 
     static void writeLog(String content) {
-        String logFileName = Environment.getExternalStorageDirectory().getAbsolutePath();
-        logFileName += "/L58Tool/Log.txt";
+        String logFileName = Environment.getExternalStorageDirectory().getAbsolutePath()+"/L58Tool";
+        File file = new File(logFileName);
+        if(!file.exists()){
+            file.mkdirs();
+        }
+        logFileName += "/Log.txt";
         FileWriter fileWriter;
         try {
             fileWriter = new FileWriter(logFileName, true);
@@ -160,7 +164,38 @@ public class PacketParserService extends Service {
         send_packet.setL1Header(l1Header);
         send_packet.setPacketValue(null, false);
         send_packet.print();
-        send(send_packet);
+
+        final byte[] data = send_packet.getPacket();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                final int packLength = 20;
+                int lastLength = data.length;
+                byte[] sendData;
+                int sendIndex = 0;
+                while (lastLength > 0) {
+                    if (lastLength <= packLength) {
+                        sendData = Arrays.copyOfRange(data, sendIndex, sendIndex + lastLength);
+                        sendIndex += lastLength;
+                        lastLength = 0;
+                    } else {
+                        sendData = Arrays.copyOfRange(data, sendIndex, sendIndex + packLength);
+                        sendIndex += packLength;
+                        lastLength -= packLength;
+                    }
+                    BluetoothLeService.HandleCommand command = BluetoothLeService.HandleCommand.NUS_WRITE_CHARACTERISTIC;
+                    GattCommand.putExtra(BluetoothLeService.HandleCMD, command.getIndex());
+                    GattCommand.putExtra(BluetoothLeService.HandleData, sendData);
+                    try {
+                        Thread.sleep(50L);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    sendBroadcast(GattCommand);
+                    GattStatus = 1;
+                }
+            }
+        }).start();
     }
 
     public int getVersion() {
