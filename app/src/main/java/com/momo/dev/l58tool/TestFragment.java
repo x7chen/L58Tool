@@ -197,75 +197,76 @@ public class TestFragment extends Fragment {
                         packetParserService.registerCallback(callBack);
                     }
                 }
-
-                switch (position) {
-                    case 0:
-                        packetParserService.setTime();
-                        break;
-                    case 1:
-                        packetParserService.getSportData();
-                        break;
-                    case 2:
-                        ArrayList<PacketParserService.Alarm> alarmList = new ArrayList<PacketParserService.Alarm>();
-                        for (int i = 0; i < 8; i++) {
-                            PacketParserService.Alarm alarm = new PacketParserService.Alarm();
-                            alarm.Year = 2015;
-                            alarm.Month = 11;
-                            alarm.Day = 21;
-                            alarm.Hour = 15;
-                            alarm.Minute = 0;
-                            alarm.Repeat = 0x7F;
-                            alarm.ID = i;
-                            alarmList.add(alarm);
-                        }
-                        packetParserService.setAlarmList(alarmList);
-                        break;
-                    case 3:
-                        packetParserService.getAlarms();
-                        break;
-                    case 4:
-                        packetParserService.setTarget(1000);
-                        break;
-                    case 5:
-                        PacketParserService.UserProfile userProfile = new PacketParserService.UserProfile();
-                        userProfile.Sex = 1;
-                        userProfile.Age = 30;
-                        userProfile.Stature = 170;
-                        userProfile.Weight = 50;
-                        packetParserService.setUserProfile(userProfile);
-                        break;
-                    case 6:
-                        packetParserService.setLossAlert(1);
-                        break;
-                    case 7:
-                        PacketParserService.LongSitSetting longSitSetting = new PacketParserService.LongSitSetting();
-                        longSitSetting.Enable = 1;
-                        longSitSetting.ThresholdSteps = 100;
-                        longSitSetting.DurationTimeMinutes = 30;
-                        longSitSetting.StartTimeHour = 8;
-                        longSitSetting.EndTimeHour = 23;
-                        longSitSetting.Repeat = 0x7F;
-                        packetParserService.setLongSit(longSitSetting);
-                        break;
-                    case 8:
-                        packetParserService.getDailyData();
-                        break;
-                    case 9:
-                        packetParserService.setWearHand(1);
-                        break;
-                    case 10:
-                        packetParserService.setHourFormat(Math.abs(random.nextInt()) % 2);
-                        break;
-                    case 11:
-                        packetParserService.mock();
-                        break;
-                    case 12:
-                        packetParserService.setSportNotify(1);
-                        break;
-                    default:
+                if(packetParserService.isIdle()) {
+                    switch (position) {
+                        case 0:
+                            packetParserService.setTime();
+                            break;
+                        case 1:
+                            packetParserService.getSportData();
+                            break;
+                        case 2:
+                            ArrayList<PacketParserService.Alarm> alarmList = new ArrayList<PacketParserService.Alarm>();
+                            for (int i = 0; i < 8; i++) {
+                                PacketParserService.Alarm alarm = new PacketParserService.Alarm();
+                                alarm.Year = 2015;
+                                alarm.Month = 11;
+                                alarm.Day = 21;
+                                alarm.Hour = 15;
+                                alarm.Minute = 0;
+                                alarm.Repeat = 0x7F;
+                                alarm.ID = i;
+                                alarmList.add(alarm);
+                            }
+                            packetParserService.setAlarmList(alarmList);
+                            break;
+                        case 3:
+                            packetParserService.getAlarms();
+                            break;
+                        case 4:
+                            packetParserService.setTarget(1000);
+                            break;
+                        case 5:
+                            PacketParserService.UserProfile userProfile = new PacketParserService.UserProfile();
+                            userProfile.Sex = 1;
+                            userProfile.Age = 30;
+                            userProfile.Stature = 170;
+                            userProfile.Weight = 50;
+                            packetParserService.setUserProfile(userProfile);
+                            break;
+                        case 6:
+                            packetParserService.setLossAlert(1);
+                            break;
+                        case 7:
+                            PacketParserService.LongSitSetting longSitSetting = new PacketParserService.LongSitSetting();
+                            longSitSetting.Enable = 1;
+                            longSitSetting.ThresholdSteps = 100;
+                            longSitSetting.DurationTimeMinutes = 30;
+                            longSitSetting.StartTimeHour = 8;
+                            longSitSetting.EndTimeHour = 23;
+                            longSitSetting.Repeat = 0x7F;
+                            packetParserService.setLongSit(longSitSetting);
+                            break;
+                        case 8:
+                            packetParserService.getDailyData();
+                            break;
+                        case 9:
+                            packetParserService.setWearHand(1);
+                            break;
+                        case 10:
+                            packetParserService.setHourFormat(Math.abs(random.nextInt()) % 2);
+                            break;
+                        case 11:
+                            packetParserService.mock();
+                            break;
+                        case 12:
+                            packetParserService.setSportNotify(1);
+                            break;
+                        default:
 //                        PacketHandle.putExtra(PacketParserService.HANDLE,position+1);
 //                        getActivity().sendBroadcast(PacketHandle);
-                        break;
+                            break;
+                    }
                 }
             }
         });
