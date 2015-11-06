@@ -13,6 +13,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
 
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -70,9 +71,9 @@ public class PacketParserService extends Service {
     };
 
     static void writeLog(String content) {
-        String logFileName = Environment.getExternalStorageDirectory().getAbsolutePath()+"/L58Tool";
+        String logFileName = Environment.getExternalStorageDirectory().getAbsolutePath() + "/L58Tool";
         File file = new File(logFileName);
-        if(!file.exists()){
+        if (!file.exists()) {
             file.mkdirs();
         }
         logFileName += "/Log.txt";
@@ -134,6 +135,16 @@ public class PacketParserService extends Service {
 
     public boolean getConnnetStatus() {
         return BLE_CONNECT_STATUS;
+    }
+
+    public boolean isIdle() {
+        if ((TimerThread.STOP.equals(sendTimerThread.getStatus()))
+                && (TimerThread.STOP.equals(receiveTimerThread.getStatus()))) {
+            return true;
+        }
+        else{
+            return false;
+        }
     }
 
     public interface CallBack {
@@ -1190,10 +1201,10 @@ public class PacketParserService extends Service {
                 GattCommand.putExtra(BluetoothLeService.HandleData, true);
                 sendBroadcast(GattCommand);
             } else if (BluetoothLeService.ACTION_GATT_CONNECTED.equals(action)) {
-                BLE_CONNECT_STATUS = true;
-                if (mPacketCallBack != null) {
-                    mPacketCallBack.onConnectStatusChanged(true);
-                }
+//                BLE_CONNECT_STATUS = true;
+//                if (mPacketCallBack != null) {
+//                    mPacketCallBack.onConnectStatusChanged(true);
+//                }
                 receive_packet.clear();
                 send_packet.clear();
             } else if (BluetoothLeService.ACTION_GATT_DISCONNECTED.equals(action)) {
@@ -1207,6 +1218,11 @@ public class PacketParserService extends Service {
                 if (mPacketCallBack != null) {
                     mPacketCallBack.onCharacteristicNotFound();
                 }
+            } else if (BluetoothLeService.ACTION_NUS_INITIALIZED.equals(action)) {
+                BLE_CONNECT_STATUS = true;
+                if (mPacketCallBack != null) {
+                    mPacketCallBack.onConnectStatusChanged(true);
+                }
             }
         }
     };
@@ -1217,7 +1233,7 @@ public class PacketParserService extends Service {
         intentFilter.addAction(BluetoothLeService.ACTION_GATT_DISCONNECTED);
         intentFilter.addAction(BluetoothLeService.ACTION_GATT_SERVICES_DISCOVERED);
         intentFilter.addAction(BluetoothLeService.ACTION_DATA_AVAILABLE);
-
+        intentFilter.addAction(BluetoothLeService.ACTION_NUS_INITIALIZED);
         intentFilter.addAction(BluetoothLeService.ACTION_GATT_CHARACTERISTIC_NOT_FOUND);
         intentFilter.addAction(PacketParserService.ACTION_PACKET_HANDLE);
 

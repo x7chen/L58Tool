@@ -136,6 +136,8 @@ public class BluetoothLeService extends Service {
             "com.example.bluetooth.le.ACTION_GATT_HANDLE";
     public final static String ACTION_GATT_CHARACTERISTIC_NOT_FOUND =
             "com.example.bluetooth.le.ACTION_GATT_CHARACTERISTIC_NOT_FOUND";
+    public final static String ACTION_NUS_INITIALIZED =
+            "com.example.bluetooth.le.ACTION_NUS_INITIALIZED";
     public static final UUID NUS_SERVICE_UUID = UUID.fromString("6e400001-b5a3-f393-e0a9-e50e24dcca9e");
     public static final UUID RX_CHAR_UUID = UUID.fromString("6e400002-b5a3-f393-e0a9-e50e24dcca9e");
     public static final UUID TX_CHAR_UUID = UUID.fromString("6e400003-b5a3-f393-e0a9-e50e24dcca9e");
@@ -517,6 +519,8 @@ public class BluetoothLeService extends Service {
                             break;
                         }
                         setCharacteristicNotification(characteristic, notification);
+                        intentAction = ACTION_NUS_INITIALIZED;
+                        broadcastUpdate(intentAction);
 //                        characteristic = mBluetoothGatt.getService(NUS_SERVICE_UUID).getCharacteristic(RX_CHAR_UUID);
 //                        setCharacteristicNotification(characteristic, notification);
                         break;
