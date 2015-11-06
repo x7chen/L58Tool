@@ -23,6 +23,8 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.List;
+
 
 public class ScanFragment extends Fragment {
     // TODO: Rename parameter arguments, choose names that match
@@ -44,6 +46,42 @@ public class ScanFragment extends Fragment {
     private Handler mHandler;
     private static final long SCAN_PERIOD = 10000;
 
+    PacketParserService.CallBack callBack = new PacketParserService.CallBack() {
+        @Override
+        public void onSendSuccess() {
+            Log.i(BluetoothLeService.TAG, "Command Send Success!");
+        }
+
+        @Override
+        public void onSendFailure() {
+
+        }
+
+        @Override
+        public void onTimeOut() {
+
+        }
+
+        @Override
+        public void onConnectStatusChanged(boolean status) {
+            Log.i(BluetoothLeService.TAG, "Connect Status Changed:" + status);
+            if (status) {
+                if (packetParserService != null) {
+                    packetParserService.setTime();
+                }
+            }
+        }
+
+        @Override
+        public void onDataReceived(byte category) {
+
+        }
+
+        @Override
+        public void onCharacteristicNotFound() {
+            Log.i(BluetoothLeService.TAG, "onCharacteristicNotFound.");
+        }
+    };
 
     /**
      * Use this factory method to create a new instance of
@@ -82,8 +120,8 @@ public class ScanFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View rootview = inflater.inflate(R.layout.fragment_scan,container,false);
-        ListView listView = (ListView)rootview.findViewById(R.id.listView_Device);
+        View rootview = inflater.inflate(R.layout.fragment_scan, container, false);
+        ListView listView = (ListView) rootview.findViewById(R.id.listView_Device);
         mLeDeviceListAdapter = new LeDeviceListAdapter(getActivity());
         listView.setAdapter(mLeDeviceListAdapter);
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -96,14 +134,14 @@ public class ScanFragment extends Fragment {
                     mBluetoothAdapter.stopLeScan(mLeScanCallback);
                     mScanning = false;
                 }
-                if(packetParserService == null){
-                    packetParserService = ((MainActivity)getActivity()).getPacketParserService();
-                    if(packetParserService == null) {
-                        Toast.makeText(getActivity(),"getPacketParserService is null.",Toast.LENGTH_SHORT).show();
+                if (packetParserService == null) {
+                    packetParserService = ((MainActivity) getActivity()).getPacketParserService();
+                    if (packetParserService == null) {
+                        Toast.makeText(getActivity(), "getPacketParserService is null.", Toast.LENGTH_SHORT).show();
                         return;
-                    }
-                    else {
-                        Toast.makeText(getActivity(),"getPacketParserService is ready.",Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(getActivity(), "getPacketParserService is ready.", Toast.LENGTH_SHORT).show();
+                        packetParserService.registerCallback(callBack);
                     }
                 }
                 if (ScanFragment.BLE_CONNECT_STATUS == false) {
@@ -113,7 +151,7 @@ public class ScanFragment extends Fragment {
                 }
             }
         });
-        Button bt_scan = (Button)(rootview.findViewById(R.id.button_scan));
+        Button bt_scan = (Button) (rootview.findViewById(R.id.button_scan));
         bt_scan.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -187,7 +225,6 @@ public class ScanFragment extends Fragment {
                     });
                 }
             };
-
 
 
 }
