@@ -209,6 +209,7 @@ public class PacketParserService extends Service {
                 }
             }
         }).start();
+        sendTimerThread.setStatus(TimerThread.STOP);
     }
 
     public int getVersion() {
@@ -1167,6 +1168,7 @@ public class PacketParserService extends Service {
                         if (mPacketCallBack != null) {
                             mPacketCallBack.onSendFailure();
                         }
+                        sendTimerThread.setStatus(TimerThread.STOP);
                     }
                     receive_packet.clear();
                 }
@@ -1188,6 +1190,7 @@ public class PacketParserService extends Service {
                 else if (checkResult == 0x0b) {
                     sendACK(receive_packet, true);
                     receive_packet.clear();
+
                 }
 
             } else if (PacketParserService.ACTION_PACKET_HANDLE.equals(action)) {
