@@ -138,11 +138,13 @@ public class PacketParserService extends Service {
     }
 
     public boolean isIdle() {
+        if (sendTimerThread == null || receiveTimerThread == null) {
+            return false;
+        }
         if ((TimerThread.STOP.equals(sendTimerThread.getStatus()))
                 && (TimerThread.STOP.equals(receiveTimerThread.getStatus()))) {
             return true;
-        }
-        else{
+        } else {
             return false;
         }
     }
