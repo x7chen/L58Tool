@@ -1190,7 +1190,7 @@ public class PacketParserService extends Service {
                 else if (checkResult == 0x0b) {
                     sendACK(receive_packet, true);
                     receive_packet.clear();
-
+                    receiveTimerThread.setStatus(TimerThread.STOP);
                 }
 
             } else if (PacketParserService.ACTION_PACKET_HANDLE.equals(action)) {
