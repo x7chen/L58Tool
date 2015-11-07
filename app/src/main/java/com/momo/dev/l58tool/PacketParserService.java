@@ -938,6 +938,9 @@ public class PacketParserService extends Service {
     private void send(Packet packet) {
 
         final byte[] data = packet.getPacket();
+        if (!isIdle()) {
+            return;
+        }
         new Thread(new Runnable() {
             @Override
             public void run() {
