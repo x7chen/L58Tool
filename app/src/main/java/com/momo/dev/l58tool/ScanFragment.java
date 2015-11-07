@@ -65,11 +65,6 @@ public class ScanFragment extends Fragment {
         @Override
         public void onConnectStatusChanged(boolean status) {
             Log.i(BluetoothLeService.TAG, "Connect Status Changed:" + status);
-            if (status) {
-                if (packetParserService != null) {
-                    packetParserService.setTime();
-                }
-            }
         }
 
         @Override

@@ -1228,6 +1228,7 @@ public class PacketParserService extends Service {
                 if (mPacketCallBack != null) {
                     mPacketCallBack.onConnectStatusChanged(true);
                 }
+                setTime();
             }
         }
     };
