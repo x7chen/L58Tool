@@ -40,7 +40,7 @@ public class Packet {
         return aL1Header;
     }
 
-    public byte[] getPacket() {
+    public byte[] toByteArray() {
 
         int packet_length = mPacket.size();
         Byte[] packet_bytes = new Byte[packet_length];
@@ -164,7 +164,7 @@ public class Packet {
 
     public void print() {
         StringBuilder strBuilder = new StringBuilder();
-        for (byte bb : getPacket()) {
+        for (byte bb : toByteArray()) {
             strBuilder.append(String.format("%02X ", bb));
         }
         strBuilder.append("\n");
@@ -173,7 +173,7 @@ public class Packet {
     @Override
     public  String toString(){
         StringBuilder strBuilder = new StringBuilder();
-        for (byte bb : getPacket()) {
+        for (byte bb : toByteArray()) {
             strBuilder.append(String.format("%02X ", bb));
         }
         strBuilder.append("\n");

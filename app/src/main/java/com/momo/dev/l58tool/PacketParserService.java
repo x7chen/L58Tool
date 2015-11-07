@@ -178,7 +178,7 @@ public class PacketParserService extends Service {
         send_packet.setPacketValue(null, false);
         send_packet.print();
 
-        final byte[] data = send_packet.getPacket();
+        final byte[] data = send_packet.toByteArray();
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -210,7 +210,7 @@ public class PacketParserService extends Service {
             }
         }).start();
         sendTimerThread.setStatus(TimerThread.STOP);
-        writeLog("ACK:" + send_packet.toString());
+        writeLog("Send ACK:" + send_packet.toString());
     }
 
     public int getVersion() {
@@ -938,7 +938,7 @@ public class PacketParserService extends Service {
 
     private void send(Packet packet) {
 
-        final byte[] data = packet.getPacket();
+        final byte[] data = packet.toByteArray();
         if (!isIdle()) {
             return;
         }
