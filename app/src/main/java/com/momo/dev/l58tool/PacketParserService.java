@@ -210,6 +210,7 @@ public class PacketParserService extends Service {
             }
         }).start();
         sendTimerThread.setStatus(TimerThread.STOP);
+        writeLog("ACK:" + send_packet.toString());
     }
 
     public int getVersion() {
@@ -972,7 +973,7 @@ public class PacketParserService extends Service {
             }
         }, "Tread-BLESend").start();
         sendTimerThread.setTimeOut(100).setStatus(TimerThread.RESTART);
-
+        writeLog("Send:" + packet.toString());
     }
 
     private void resolve(Packet.PacketValue packetValue) {
@@ -1155,7 +1156,7 @@ public class PacketParserService extends Service {
                 }
                 //发送成功
                 else if (checkResult == 0x10) {
-                    writeLog("Send:" + send_packet.toString());
+                    writeLog("Receive ACK:" + receive_packet.toString());
                     receive_packet.clear();
                     if (mPacketCallBack != null) {
                         mPacketCallBack.onSendSuccess();
@@ -1164,6 +1165,7 @@ public class PacketParserService extends Service {
                 }
                 //ACK错误，需要重发
                 else if (checkResult == 0x30) {
+                    writeLog("Receive ACK:" + receive_packet.toString());
                     if (0 < resent_cnt--) {
                         Log.i(BluetoothLeService.TAG, "Resent Packet!");
                         send(send_packet);
@@ -1184,13 +1186,14 @@ public class PacketParserService extends Service {
                         Log.i(BluetoothLeService.TAG, "Packet.PacketValue:CloneNotSupportedException");
                     }
                     Log.i(BluetoothLeService.TAG, "Send ACK!");
-                    sendACK(receive_packet, false);
                     writeLog("Receive:" + receive_packet.toString());
+                    sendACK(receive_packet, false);
                     receive_packet.clear();
                     receiveTimerThread.setStatus(TimerThread.STOP);
                 }
                 //接收数据包校验错误
                 else if (checkResult == 0x0b) {
+                    writeLog("Receive:" + receive_packet.toString());
                     sendACK(receive_packet, true);
                     receive_packet.clear();
                     receiveTimerThread.setStatus(TimerThread.STOP);
