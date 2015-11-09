@@ -50,69 +50,11 @@ public class BluetoothLeService extends Service {
     public static String HandleData = "HandleCommand.Data";
     public static String HandleDeviceAddress = "HandleCommand.DeviceAddress";
 
-    public enum HandleCommand {
-        COMMAND_DUMMY("COMMAND_DUMMY", 0),
-        NORDIC_BLE_CONNECT("NORDIC_BLE_CONNECT", 1),
-        NORDIC_BLE_DISCONNECT("NORDIC_BLE_DISCONNECT", 2),
-        NUS_READ_CHARACTERISTIC("NUS_READ_CHARACTERISTIC", 3),
-        NUS_WRITE_CHARACTERISTIC("NUS_WRITE_CHARACTERISTIC", 4),
-        NUS_TX_SET_NOTIFICATION("NUS_TX_SET_NOTIFICATION", 5);
-
-        // 成员变量
-        private String command;
-        private int index;
-
-        // 构造方法
-        private HandleCommand(String command, int index) {
-            this.command = command;
-            this.index = index;
-        }
-
-        // 普通方法
-        public static HandleCommand getHandleCommand(int index) {
-            for (HandleCommand hc : HandleCommand.values()) {
-                if (hc.getIndex() == index) {
-                    return hc;
-                }
-            }
-            return null;
-        }
-
-        public static HandleCommand getHandleCommand(String command) {
-            for (HandleCommand hc : HandleCommand.values()) {
-                if (hc.getCommand() == command) {
-                    return hc;
-                }
-            }
-            return null;
-        }
-
-        public static int getHandleCommandIndex(String command) {
-            for (HandleCommand hc : HandleCommand.values()) {
-                if (hc.getCommand() == command) {
-                    return hc.index;
-                }
-            }
-            return 0;
-        }
-
-        // get set 方法
-        public String getCommand() {
-            return command;
-        }
-
-        public void setCommand(String command) {
-            this.command = command;
-        }
-
-        public int getIndex() {
-            return index;
-        }
-
-        public void setIndex(int index) {
-            this.index = index;
-        }
-    }
+    public static final int NORDIC_BLE_CONNECT = 1;
+    public static final int NORDIC_BLE_DISCONNECT = 2;
+    public static final int NUS_READ_CHARACTERISTIC = 3;
+    public static final int NUS_WRITE_CHARACTERISTIC = 4;
+    public static final int NUS_TX_SET_NOTIFICATION = 5;
 
     private BluetoothManager mBluetoothManager;
     private BluetoothAdapter mBluetoothAdapter;
@@ -454,7 +396,7 @@ public class BluetoothLeService extends Service {
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
             String intentAction;
-            HandleCommand cmd = HandleCommand.getHandleCommand(intent.getIntExtra(HandleCMD, 0));
+            int cmd = intent.getIntExtra(HandleCMD, 0);
             BluetoothGattCharacteristic characteristic;
             BluetoothGattService service;
             if (BluetoothLeService.ACTION_GATT_HANDLE.equals(action)) {

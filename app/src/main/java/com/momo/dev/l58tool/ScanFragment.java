@@ -123,7 +123,6 @@ public class ScanFragment extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 final BluetoothDevice device = mLeDeviceListAdapter.getDevice(position);
-                BluetoothLeService.HandleCommand cmd;
                 if (device == null) return;
                 if (mScanning) {
                     mBluetoothAdapter.stopLeScan(mLeScanCallback);

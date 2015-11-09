@@ -121,15 +121,13 @@ public class PacketParserService extends Service {
 
     public void connect(String address) {
 
-        BluetoothLeService.HandleCommand cmd = BluetoothLeService.HandleCommand.NORDIC_BLE_CONNECT;
-        GattCommand.putExtra(BluetoothLeService.HandleCMD, cmd.getHandleCommandIndex(cmd.getCommand()));
+        GattCommand.putExtra(BluetoothLeService.HandleCMD, BluetoothLeService.NORDIC_BLE_CONNECT);
         GattCommand.putExtra(BluetoothLeService.HandleDeviceAddress, address);
         sendBroadcast(GattCommand);
     }
 
     public void disconnect() {
-        BluetoothLeService.HandleCommand cmd = BluetoothLeService.HandleCommand.NORDIC_BLE_DISCONNECT;
-        GattCommand.putExtra(BluetoothLeService.HandleCMD, cmd.getHandleCommandIndex(cmd.getCommand()));
+        GattCommand.putExtra(BluetoothLeService.HandleCMD, BluetoothLeService.NORDIC_BLE_DISCONNECT);
         sendBroadcast(GattCommand);
     }
 
@@ -196,8 +194,7 @@ public class PacketParserService extends Service {
                         sendIndex += packLength;
                         lastLength -= packLength;
                     }
-                    BluetoothLeService.HandleCommand command = BluetoothLeService.HandleCommand.NUS_WRITE_CHARACTERISTIC;
-                    GattCommand.putExtra(BluetoothLeService.HandleCMD, command.getIndex());
+                    GattCommand.putExtra(BluetoothLeService.HandleCMD, BluetoothLeService.NUS_WRITE_CHARACTERISTIC);
                     GattCommand.putExtra(BluetoothLeService.HandleData, sendData);
                     try {
                         Thread.sleep(50L);
@@ -959,8 +956,7 @@ public class PacketParserService extends Service {
                         sendIndex += packLength;
                         lastLength -= packLength;
                     }
-                    BluetoothLeService.HandleCommand command = BluetoothLeService.HandleCommand.NUS_WRITE_CHARACTERISTIC;
-                    GattCommand.putExtra(BluetoothLeService.HandleCMD, command.getIndex());
+                    GattCommand.putExtra(BluetoothLeService.HandleCMD, BluetoothLeService.NUS_WRITE_CHARACTERISTIC);
                     GattCommand.putExtra(BluetoothLeService.HandleData, sendData);
                     try {
                         Thread.sleep(50L);
@@ -972,7 +968,7 @@ public class PacketParserService extends Service {
                 }
             }
         }, "Tread-BLESend").start();
-        sendTimerThread.setTimeOut(100).setStatus(TimerThread.RESTART);
+        sendTimerThread.setTimeOut(200).setStatus(TimerThread.RESTART);
         writeLog("Send:" + packet.toString());
     }
 
@@ -1146,7 +1142,7 @@ public class PacketParserService extends Service {
             } else if (BluetoothLeService.ACTION_DATA_AVAILABLE.equals(action)) {
                 byte[] data = intent.getByteArrayExtra(BluetoothLeService.HandleData);
                 receive_packet.append(data);
-                receiveTimerThread.setTimeOut(100).setStatus(TimerThread.RESTART);
+                receiveTimerThread.setTimeOut(200).setStatus(TimerThread.RESTART);
                 int checkResult = receive_packet.checkPacket();
                 Log.i(BluetoothLeService.TAG, "Check:" + Integer.toHexString(checkResult));
                 receive_packet.print();
@@ -1207,8 +1203,7 @@ public class PacketParserService extends Service {
                         break;
                 }
             } else if (BluetoothLeService.ACTION_GATT_SERVICES_DISCOVERED.equals(action)) {
-                BluetoothLeService.HandleCommand cmd = BluetoothLeService.HandleCommand.NUS_TX_SET_NOTIFICATION;
-                GattCommand.putExtra(BluetoothLeService.HandleCMD, cmd.getIndex());
+                GattCommand.putExtra(BluetoothLeService.HandleCMD, BluetoothLeService.NUS_TX_SET_NOTIFICATION);
                 GattCommand.putExtra(BluetoothLeService.HandleData, true);
                 sendBroadcast(GattCommand);
             } else if (BluetoothLeService.ACTION_GATT_CONNECTED.equals(action)) {
