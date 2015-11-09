@@ -2,10 +2,20 @@ package com.momo.dev.l58tool;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 
 public class LogFragment extends Fragment {
     // TODO: Rename parameter arguments, choose names that match
@@ -39,6 +49,34 @@ public class LogFragment extends Fragment {
     public LogFragment() {
         // Required empty public constructor
     }
+    static String ReadLog() {
+        String logFileName = Environment.getExternalStorageDirectory().getAbsolutePath() + "/L58Tool/Log.txt";
+        File file = new File(logFileName);
+        if (!file.exists()) {
+            return null;
+        }
+        try {
+            FileInputStream fis = new FileInputStream(file);
+            BufferedReader br = new BufferedReader(new InputStreamReader(fis));
+            StringBuilder sb = new StringBuilder("");
+            String line = null;
+            while ((line=br.readLine())!=null){
+                sb.append(line);
+                sb.append("\n");
+            }
+            br.close();
+            return sb.toString();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        tv.setText((ReadLog()));
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -48,12 +86,15 @@ public class LogFragment extends Fragment {
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
     }
-
+    View rootview;
+    TextView tv;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        rootview = inflater.inflate(R.layout.fragment_log,container,false);
+        tv = (TextView)(rootview.findViewById(R.id.log_tv));
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_log, container, false);
+        return rootview;
     }
 
     @Override
