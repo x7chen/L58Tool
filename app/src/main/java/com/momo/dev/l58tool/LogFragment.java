@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,6 +13,8 @@ import android.widget.TextView;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 
 public class LogFragment extends Fragment {
@@ -74,6 +77,35 @@ public class LogFragment extends Fragment {
     public void onResume() {
         super.onResume();
         tv.setText((ReadLog()));
+//        InputStream inputStream = getResources().openRawResource(R.raw.res_hzk16);
+//
+//        StringBuilder stringBuilder = new StringBuilder();
+//        String string = "中文";
+//        for (int m = 0; m < string.length(); m++) {
+//            String hz = string.substring(m, m + 1);
+//            try {
+//                byte[] tran = hzk16.getMatrix(inputStream, hz);
+//                int i, j, k;
+//                for (i = 0; i < 16; i++) {          /* 点阵行数索引 */
+//                    for (j = 1; j >= 0; j--) {       /* 点阵左子行右子行索引 */
+//                        for (k = 0; k < 8; k++) {   /* 点阵每个点 */
+//
+//                            // 判断是0、还是1
+//                            if (((tran[i * 2 + j] >> (k)) & 0x1) == 1) {
+//                                stringBuilder.append("  .");
+//                            } else {
+//                                stringBuilder.append("   ");
+//                            }
+//                        }
+//                    }
+//                    stringBuilder.append("\n");
+//                }
+//
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+//        }
+//        tv.setText(stringBuilder.toString());
     }
 
     @Override

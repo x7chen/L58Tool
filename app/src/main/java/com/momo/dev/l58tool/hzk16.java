@@ -1,9 +1,11 @@
 package com.momo.dev.l58tool;
 
 import android.os.Environment;
+import android.util.Log;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.RandomAccessFile;
 import java.io.UnsupportedEncodingException;
 
@@ -32,7 +34,7 @@ public class hzk16 {
         return null;
     }
 
-    public static byte[] read(String hzk, String hz) throws IOException {
+    public static byte[] read(InputStream hzk, String hz) {
         int[] res = getQw(hz);
         int qh = res[0];
         int wh = res[1];
@@ -41,10 +43,16 @@ public class hzk16 {
         // 点阵缓冲 16x16 = 32x8
         byte[] bs = new byte[32];
         byte[] trans = new byte[32];
-        RandomAccessFile r = new RandomAccessFile(new File(hzk), "r");// 只读方式打开文件
-        r.seek(location);                   // 指定下一次的开始位置
-        r.read(bs);
-        r.close();
+        try {
+            hzk.reset();
+//            int i=hzk.available();
+//            Log.i(BluetoothLeService.TAG, "hzk16.size:" + String.valueOf(i));
+            hzk.skip(location);
+            hzk.read(bs);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
 
         int i, j, k;
         for (i = 0; i < 16; i++) {          /* 点阵行数索引 */
@@ -63,13 +71,8 @@ public class hzk16 {
         return trans;
     }
 
-    public static byte[] getMatrix(String hz) throws IOException {
-        String hzkFileName = Environment.getExternalStorageDirectory().getAbsolutePath() + "/L58Tool/hzk16";
-        File file = new File(hzkFileName);
-        if (!file.exists()) {
-            return null;
-        }
-        return read(hzkFileName, hz);
+    public static byte[] getMatrix(InputStream inputStream,String hz) throws IOException {
+        return read(inputStream, hz);
 
     }
 }
