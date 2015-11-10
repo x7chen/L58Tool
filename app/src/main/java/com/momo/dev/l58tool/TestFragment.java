@@ -15,6 +15,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -81,6 +82,7 @@ public class TestFragment extends Fragment {
         mtestItemAdapter.addItem(new TestItem("设置时间格式", ""));
         mtestItemAdapter.addItem(new TestItem("模拟数据", ""));
         mtestItemAdapter.addItem(new TestItem("打开实时数据", ""));
+        mtestItemAdapter.addItem(new TestItem("发送联系人", ""));
     }
 
     PacketParserService.CallBack callBack = new PacketParserService.CallBack() {
@@ -261,6 +263,13 @@ public class TestFragment extends Fragment {
                             break;
                         case 12:
                             packetParserService.setSportNotify(1);
+                            break;
+                        case 13:
+                            try {
+                                packetParserService.telNotify("其他字体");
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
                             break;
                         default:
 //                        PacketHandle.putExtra(PacketParserService.HANDLE,position+1);

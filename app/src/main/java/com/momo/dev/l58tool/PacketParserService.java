@@ -859,6 +859,40 @@ public class PacketParserService extends Service {
         resent_cnt = 3;
     }
 
+    public void telNotify(String contact) throws IOException {
+
+        Packet.PacketValue packetValue = new Packet.PacketValue();
+        packetValue.setCommandId((byte) (0x04));
+        packetValue.setKey((byte) (0x11));
+        packetValue.appendValue(Packet.byteToByte((byte) 0x01));
+        if (contact.length() > 6) {
+            return;
+        }
+        for (int i = 0; i < contact.length(); i++) {
+            packetValue.appendValue(hzk16.getMatrix(contact.substring(i, i + 1)));
+        }
+        send_packet.setPacketValue(packetValue, true);
+        send_packet.print();
+        send(send_packet);
+        resent_cnt = 3;
+    }
+    public void infoNotify(String info) throws IOException {
+
+        Packet.PacketValue packetValue = new Packet.PacketValue();
+        packetValue.setCommandId((byte) (0x04));
+        packetValue.setKey((byte) (0x12));
+        packetValue.appendValue(Packet.byteToByte((byte)0x01));
+        if (info.length() > 6) {
+            return;
+        }
+        for (int i = 0; i < info.length(); i++) {
+            packetValue.appendValue(hzk16.getMatrix(info.substring(i, i + 1)));
+        }
+        send_packet.setPacketValue(packetValue, true);
+        send_packet.print();
+        send(send_packet);
+        resent_cnt = 3;
+    }
     public void mock() {
         new Thread() {
             @Override
@@ -959,7 +993,7 @@ public class PacketParserService extends Service {
                     GattCommand.putExtra(BluetoothLeService.HandleCMD, BluetoothLeService.NUS_WRITE_CHARACTERISTIC);
                     GattCommand.putExtra(BluetoothLeService.HandleData, sendData);
                     try {
-                        Thread.sleep(50L);
+                        Thread.sleep(200L);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
@@ -968,7 +1002,7 @@ public class PacketParserService extends Service {
                 }
             }
         }, "Tread-BLESend").start();
-        sendTimerThread.setTimeOut(200).setStatus(TimerThread.RESTART);
+        sendTimerThread.setTimeOut(500).setStatus(TimerThread.RESTART);
         writeLog("Send:" + packet.toString());
     }
 
@@ -1142,7 +1176,7 @@ public class PacketParserService extends Service {
             } else if (BluetoothLeService.ACTION_DATA_AVAILABLE.equals(action)) {
                 byte[] data = intent.getByteArrayExtra(BluetoothLeService.HandleData);
                 receive_packet.append(data);
-                receiveTimerThread.setTimeOut(200).setStatus(TimerThread.RESTART);
+                receiveTimerThread.setTimeOut(500).setStatus(TimerThread.RESTART);
                 int checkResult = receive_packet.checkPacket();
                 Log.i(BluetoothLeService.TAG, "Check:" + Integer.toHexString(checkResult));
                 receive_packet.print();
