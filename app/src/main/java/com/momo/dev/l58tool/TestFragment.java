@@ -199,7 +199,7 @@ public class TestFragment extends Fragment {
                         packetParserService.registerCallback(callBack);
                     }
                 }
-                if(packetParserService.isIdle()) {
+                if (packetParserService.isIdle()) {
                     switch (position) {
                         case 0:
                             packetParserService.setTime();

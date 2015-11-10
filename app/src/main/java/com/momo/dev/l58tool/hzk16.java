@@ -64,12 +64,12 @@ public class hzk16 {
     }
 
     public static byte[] getMatrix(String hz) throws IOException {
-        String logFileName = Environment.getExternalStorageDirectory().getAbsolutePath() + "/L58Tool/hzk16";
-        File file = new File(logFileName);
+        String hzkFileName = Environment.getExternalStorageDirectory().getAbsolutePath() + "/L58Tool/hzk16";
+        File file = new File(hzkFileName);
         if (!file.exists()) {
             return null;
         }
-        return read(logFileName, hz);
+        return read(hzkFileName, hz);
 
     }
 }
