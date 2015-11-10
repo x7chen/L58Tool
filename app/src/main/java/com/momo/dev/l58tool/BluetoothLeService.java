@@ -74,6 +74,8 @@ public class BluetoothLeService extends Service {
             "com.example.bluetooth.le.ACTION_GATT_SERVICES_DISCOVERED";
     public final static String ACTION_DATA_AVAILABLE =
             "com.example.bluetooth.le.ACTION_DATA_AVAILABLE";
+    public final static String ACTION_DATA_SEND_OK =
+            "com.example.bluetooth.le.ACTION_DATA_SEND_OUT";
     public final static String ACTION_GATT_HANDLE =
             "com.example.bluetooth.le.ACTION_GATT_HANDLE";
     public final static String ACTION_GATT_CHARACTERISTIC_NOT_FOUND =
@@ -132,6 +134,7 @@ public class BluetoothLeService extends Service {
         @Override
         public void onCharacteristicWrite(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
             Log.i(TAG, "onCharacteristicWrite status:" + String.valueOf(status));
+            broadcastUpdate(ACTION_DATA_SEND_OK);
             super.onCharacteristicWrite(gatt, characteristic, status);
         }
 

@@ -53,22 +53,23 @@ public class hzk16 {
 
                     // 判断是0、还是1
                     if (((bs[i * 2 + j] >> (7 - k)) & 0x1) == 1) {
-                        trans[(8 * j + k) * 2 + i / 8] |= (1 << (7-(i % 8)));
+                        trans[(8 * j + k) * 2 + i / 8] |= (1 << (7 - (i % 8)));
                     } else {
-                        trans[(8 * j + k) * 2 + i / 8] &= ~(1 << (7-(i % 8)));
+                        trans[(8 * j + k) * 2 + i / 8] &= ~(1 << (7 - (i % 8)));
                     }
                 }
             }
         }
         return trans;
     }
+
     public static byte[] getMatrix(String hz) throws IOException {
         String logFileName = Environment.getExternalStorageDirectory().getAbsolutePath() + "/L58Tool/hzk16";
         File file = new File(logFileName);
         if (!file.exists()) {
             return null;
         }
-        return read(logFileName,hz);
+        return read(logFileName, hz);
 
     }
 }

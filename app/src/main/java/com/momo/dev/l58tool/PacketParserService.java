@@ -33,7 +33,6 @@ public class PacketParserService extends Service {
 
     public final static String HANDLE = "PacketHandle";
     boolean BLE_CONNECT_STATUS = false;
-    private int GattStatus = 0;
     private int resent_cnt = 0;
     private Intent GattCommand = new Intent(BluetoothLeService.ACTION_GATT_HANDLE);
 
@@ -54,6 +53,7 @@ public class PacketParserService extends Service {
 
     private Packet send_packet = new Packet();
     private Packet receive_packet = new Packet();
+    private sendThread mSendThread;
 
     final android.os.Handler mHandler = new android.os.Handler() {
         @Override
@@ -202,7 +202,6 @@ public class PacketParserService extends Service {
                         e.printStackTrace();
                     }
                     sendBroadcast(GattCommand);
-                    GattStatus = 1;
                 }
             }
         }).start();
@@ -876,12 +875,13 @@ public class PacketParserService extends Service {
         send(send_packet);
         resent_cnt = 3;
     }
+
     public void infoNotify(String info) throws IOException {
 
         Packet.PacketValue packetValue = new Packet.PacketValue();
         packetValue.setCommandId((byte) (0x04));
         packetValue.setKey((byte) (0x12));
-        packetValue.appendValue(Packet.byteToByte((byte)0x01));
+        packetValue.appendValue(Packet.byteToByte((byte) 0x01));
         if (info.length() > 6) {
             return;
         }
@@ -893,6 +893,7 @@ public class PacketParserService extends Service {
         send(send_packet);
         resent_cnt = 3;
     }
+
     public void mock() {
         new Thread() {
             @Override
@@ -973,37 +974,57 @@ public class PacketParserService extends Service {
         if (!isIdle()) {
             return;
         }
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                final int packLength = 20;
-                int lastLength = data.length;
-                byte[] sendData;
-                int sendIndex = 0;
-                while (lastLength > 0) {
-                    if (lastLength <= packLength) {
-                        sendData = Arrays.copyOfRange(data, sendIndex, sendIndex + lastLength);
-                        sendIndex += lastLength;
-                        lastLength = 0;
-                    } else {
-                        sendData = Arrays.copyOfRange(data, sendIndex, sendIndex + packLength);
-                        sendIndex += packLength;
-                        lastLength -= packLength;
-                    }
-                    GattCommand.putExtra(BluetoothLeService.HandleCMD, BluetoothLeService.NUS_WRITE_CHARACTERISTIC);
-                    GattCommand.putExtra(BluetoothLeService.HandleData, sendData);
+        mSendThread = new sendThread(data);
+        mSendThread.start();
+        sendTimerThread.setTimeOut(500).setStatus(TimerThread.RESTART);
+        writeLog("Send:" + packet.toString());
+    }
+
+    class sendThread extends Thread {
+        byte[] mData;
+        boolean SEND_OVER = true;
+
+        sendThread(byte[] data) {
+            mData = data;
+        }
+
+        public void updateStatus(boolean status) {
+            SEND_OVER = status;
+        }
+
+        public void run() {
+            final int packLength = 20;
+            int lastLength = mData.length;
+            byte[] sendData;
+            int sendIndex = 0;
+            try {
+                Thread.sleep(50L);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            while (lastLength > 0) {
+                if (lastLength <= packLength) {
+                    sendData = Arrays.copyOfRange(mData, sendIndex, sendIndex + lastLength);
+                    sendIndex += lastLength;
+                    lastLength = 0;
+                } else {
+                    sendData = Arrays.copyOfRange(mData, sendIndex, sendIndex + packLength);
+                    sendIndex += packLength;
+                    lastLength -= packLength;
+                }
+                GattCommand.putExtra(BluetoothLeService.HandleCMD, BluetoothLeService.NUS_WRITE_CHARACTERISTIC);
+                GattCommand.putExtra(BluetoothLeService.HandleData, sendData);
+                do {
                     try {
-                        Thread.sleep(200L);
+                        Thread.sleep(20L);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
-                    sendBroadcast(GattCommand);
-                    GattStatus = 1;
-                }
+                } while (!SEND_OVER);
+                sendBroadcast(GattCommand);
+                SEND_OVER = false;
             }
-        }, "Tread-BLESend").start();
-        sendTimerThread.setTimeOut(500).setStatus(TimerThread.RESTART);
-        writeLog("Send:" + packet.toString());
+        }
     }
 
     private void resolve(Packet.PacketValue packetValue) {
@@ -1186,15 +1207,18 @@ public class PacketParserService extends Service {
                 }
                 //发送成功
                 else if (checkResult == 0x10) {
+                    sendTimerThread.setStatus(TimerThread.STOP);
+                    receiveTimerThread.setStatus(TimerThread.STOP);
                     writeLog("Receive ACK:" + receive_packet.toString());
                     receive_packet.clear();
                     if (mPacketCallBack != null) {
                         mPacketCallBack.onSendSuccess();
                     }
-                    sendTimerThread.setStatus(TimerThread.STOP);
                 }
                 //ACK错误，需要重发
                 else if (checkResult == 0x30) {
+                    sendTimerThread.setStatus(TimerThread.STOP);
+                    receiveTimerThread.setStatus(TimerThread.STOP);
                     writeLog("Receive ACK:" + receive_packet.toString());
                     if (0 < resent_cnt--) {
                         Log.i(BluetoothLeService.TAG, "Resent Packet!");
@@ -1203,12 +1227,12 @@ public class PacketParserService extends Service {
                         if (mPacketCallBack != null) {
                             mPacketCallBack.onSendFailure();
                         }
-                        sendTimerThread.setStatus(TimerThread.STOP);
                     }
                     receive_packet.clear();
                 }
                 //接收数据包校验正确
                 else if (checkResult == 0) {
+                    receiveTimerThread.setStatus(TimerThread.STOP);
                     try {
                         Packet.PacketValue packetValue = (Packet.PacketValue) receive_packet.getPacketValue().clone();
                         resolve(packetValue);
@@ -1219,14 +1243,13 @@ public class PacketParserService extends Service {
                     writeLog("Receive:" + receive_packet.toString());
                     sendACK(receive_packet, false);
                     receive_packet.clear();
-                    receiveTimerThread.setStatus(TimerThread.STOP);
                 }
                 //接收数据包校验错误
                 else if (checkResult == 0x0b) {
+                    receiveTimerThread.setStatus(TimerThread.STOP);
                     writeLog("Receive:" + receive_packet.toString());
                     sendACK(receive_packet, true);
                     receive_packet.clear();
-                    receiveTimerThread.setStatus(TimerThread.STOP);
                 }
 
             } else if (PacketParserService.ACTION_PACKET_HANDLE.equals(action)) {
@@ -1264,6 +1287,10 @@ public class PacketParserService extends Service {
                     mPacketCallBack.onConnectStatusChanged(true);
                 }
                 setTime();
+            } else if (BluetoothLeService.ACTION_DATA_SEND_OK.equals(action)) {
+                if (mSendThread != null) {
+                    mSendThread.updateStatus(true);
+                }
             }
         }
     };
@@ -1276,6 +1303,8 @@ public class PacketParserService extends Service {
         intentFilter.addAction(BluetoothLeService.ACTION_DATA_AVAILABLE);
         intentFilter.addAction(BluetoothLeService.ACTION_NUS_INITIALIZED);
         intentFilter.addAction(BluetoothLeService.ACTION_GATT_CHARACTERISTIC_NOT_FOUND);
+        intentFilter.addAction(BluetoothLeService.ACTION_DATA_SEND_OK);
+
         intentFilter.addAction(PacketParserService.ACTION_PACKET_HANDLE);
 
 //        intentFilter.addAction(BluetoothLeService.ACTION_GATT_HANDLE);

@@ -82,7 +82,7 @@ public class TestFragment extends Fragment {
         mtestItemAdapter.addItem(new TestItem("设置时间格式", ""));
         mtestItemAdapter.addItem(new TestItem("模拟数据", ""));
         mtestItemAdapter.addItem(new TestItem("打开实时数据", ""));
-        mtestItemAdapter.addItem(new TestItem("发送联系人", ""));
+        mtestItemAdapter.addItem(new TestItem("发送汉字", ""));
     }
 
     PacketParserService.CallBack callBack = new PacketParserService.CallBack() {
@@ -266,7 +266,7 @@ public class TestFragment extends Fragment {
                             break;
                         case 13:
                             try {
-                                packetParserService.telNotify("其他字体");
+                                packetParserService.telNotify("手机发送汉字");
                             } catch (IOException e) {
                                 e.printStackTrace();
                             }
