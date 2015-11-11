@@ -16,7 +16,6 @@ import android.util.Log;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -860,16 +859,15 @@ public class PacketParserService extends Service {
     }
 
     public void telNotify(String contact) throws IOException {
-        InputStream inputStream = getResources().openRawResource(R.raw.res_hzk16);
         Packet.PacketValue packetValue = new Packet.PacketValue();
         packetValue.setCommandId((byte) (0x04));
         packetValue.setKey((byte) (0x11));
         packetValue.appendValue(Packet.byteToByte((byte) 0x01));
-        if (contact.length() > 6) {
+        if (contact.length() > 12) {
             return;
         }
         for (int i = 0; i < contact.length(); i++) {
-            packetValue.appendValue(hzk16.getMatrix(inputStream,contact.substring(i, i + 1)));
+            packetValue.appendValue(hzk16.getMatrix(getApplicationContext(), contact.substring(i, i + 1)));
         }
         send_packet.setPacketValue(packetValue, true);
         send_packet.print();
@@ -879,16 +877,15 @@ public class PacketParserService extends Service {
 
     public void infoNotify(String info) throws IOException {
 
-        InputStream inputStream = getResources().openRawResource(R.raw.res_hzk16);
         Packet.PacketValue packetValue = new Packet.PacketValue();
         packetValue.setCommandId((byte) (0x04));
         packetValue.setKey((byte) (0x12));
         packetValue.appendValue(Packet.byteToByte((byte) 0x01));
-        if (info.length() > 6) {
+        if (info.length() > 12) {
             return;
         }
         for (int i = 0; i < info.length(); i++) {
-            packetValue.appendValue(hzk16.getMatrix(inputStream,info.substring(i, i + 1)));
+            packetValue.appendValue(hzk16.getMatrix(getApplicationContext(), info.substring(i, i + 1)));
         }
         send_packet.setPacketValue(packetValue, true);
         send_packet.print();

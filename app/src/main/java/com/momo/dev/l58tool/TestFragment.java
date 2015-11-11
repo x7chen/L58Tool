@@ -266,7 +266,7 @@ public class TestFragment extends Fragment {
                             break;
                         case 13:
                             try {
-                                packetParserService.telNotify("手机发送汉字");
+                                packetParserService.telNotify("Sean的短信");
                             } catch (IOException e) {
                                 e.printStackTrace();
                             }
