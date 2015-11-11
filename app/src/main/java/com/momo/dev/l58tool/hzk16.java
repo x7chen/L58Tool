@@ -34,7 +34,13 @@ public class hzk16 {
         return null;
     }
 
-    public static byte[] read(InputStream hzk, String hz) {
+    public static byte[] getMatrix(InputStream hzk, String hz) {
+        if(hzk == null){
+            return null;
+        }
+        if (hz == null) {
+            return null;
+        }
         int[] res = getQw(hz);
         int qh = res[0];
         int wh = res[1];
@@ -69,10 +75,5 @@ public class hzk16 {
             }
         }
         return trans;
-    }
-
-    public static byte[] getMatrix(InputStream inputStream,String hz) throws IOException {
-        return read(inputStream, hz);
-
     }
 }
