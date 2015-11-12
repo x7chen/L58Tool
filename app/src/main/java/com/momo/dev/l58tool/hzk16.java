@@ -36,6 +36,11 @@ public class hzk16 {
         return null;
     }
 
+    /*取字模顺序:
+     *          1  3  5
+     *          2  4  6
+     *
+     */
     public static byte[] getMatrix(Context context, String str) {
         if (str == null) {
             return null;
